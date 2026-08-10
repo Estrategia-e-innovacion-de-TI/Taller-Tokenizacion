@@ -1,29 +1,14 @@
 import { useId, useState, type ReactNode } from "react";
 import type { Enlace } from "../../data/enlaces";
+import { ACCENT_BORDER, ACCENT_CHIP, type Accent } from "./accent";
 
 type Props = {
   term: string;
   summary: string;
   children?: ReactNode;
   links?: Enlace[];
-  accent?: "amarillo" | "verde" | "naranja" | "rosado" | "azul";
+  accent?: Accent;
 };
-
-const accentBorder = {
-  amarillo: "border-l-amarillo",
-  verde: "border-l-verde",
-  naranja: "border-l-naranja",
-  rosado: "border-l-rosado",
-  azul: "border-l-azul",
-} as const;
-
-const accentChip = {
-  amarillo: "border-amarillo bg-amarillo/30",
-  verde: "border-verde bg-verde/25",
-  naranja: "border-naranja bg-naranja/25",
-  rosado: "border-rosado bg-rosado/40",
-  azul: "border-azul bg-azul/25",
-} as const;
 
 /** Término clicable: expande explicación y enlaces de interés. */
 export function ConceptExpand({
@@ -43,7 +28,7 @@ export function ConceptExpand({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
-        className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-left text-sm font-semibold text-negro transition ${accentChip[accent]} ${
+        className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-left text-sm font-semibold text-negro transition ${ACCENT_CHIP[accent]} ${
           open ? "ring-2 ring-negro/15" : "hover:ring-2 hover:ring-negro/10"
         }`}
       >
@@ -55,7 +40,7 @@ export function ConceptExpand({
       {open ? (
         <div
           id={panelId}
-          className={`mt-2 border border-negro/10 border-l-4 bg-blanco p-4 ${accentBorder[accent]}`}
+          className={`mt-2 border border-negro/10 border-l-4 bg-blanco p-4 ${ACCENT_BORDER[accent]}`}
         >
           <p className="text-sm leading-relaxed text-negro/75">{summary}</p>
           {children ? (
@@ -72,7 +57,7 @@ export function ConceptExpand({
                     href={l.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-semibold underline decoration-azul decoration-2 underline-offset-2 hover:decoration-naranja"
+                    className="link-accent"
                   >
                     {l.starred ? "★ " : ""}
                     {l.label}

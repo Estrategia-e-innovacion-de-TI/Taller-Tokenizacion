@@ -15,6 +15,16 @@ import {
   CHART_RUTA,
   CHART_TRANSFER_3643,
   CHART_TREASURY,
+  NOTES_ARQUITECTURA,
+  NOTES_CICLO,
+  NOTES_CLAVE,
+  NOTES_CREDIT,
+  NOTES_HIBRIDA,
+  NOTES_POC,
+  NOTES_REAL_ESTATE,
+  NOTES_RUTA,
+  NOTES_TRANSFER_3643,
+  NOTES_TREASURY,
 } from "../../data/guia-diagrams";
 
 const sections = [
@@ -71,6 +81,7 @@ export function GuiaRwaPage() {
         </p>
         <MermaidDiagram
           chart={CHART_CICLO}
+          notes={NOTES_CICLO}
           caption="Ciclo general de tokenización"
         />
         <div className="flex flex-wrap gap-2">
@@ -105,10 +116,12 @@ export function GuiaRwaPage() {
         </p>
         <MermaidDiagram
           chart={CHART_ARQUITECTURA}
+          notes={NOTES_ARQUITECTURA}
           caption="Capas de una arquitectura RWA institucional"
         />
         <MermaidDiagram
           chart={CHART_HIBRIDA}
+          notes={NOTES_HIBRIDA}
           caption="Arquitectura híbrida: off-chain ↔ oracle ↔ on-chain"
         />
         <div className="flex flex-wrap gap-2">
@@ -140,6 +153,7 @@ export function GuiaRwaPage() {
         </p>
         <MermaidDiagram
           chart={CHART_TRANSFER_3643}
+          notes={NOTES_TRANSFER_3643}
           caption="Transferencia con restricciones (estilo ERC-3643)"
         />
         <div className="flex flex-wrap gap-2">
@@ -169,7 +183,7 @@ export function GuiaRwaPage() {
             <p className="text-xs font-semibold tracking-wider text-negro/45 uppercase">
               Treasury / bonos
             </p>
-            <MermaidDiagram chart={CHART_TREASURY} />
+            <MermaidDiagram chart={CHART_TREASURY} notes={NOTES_TREASURY} />
             <ConceptExpand
               term="Profundizar Treasury"
               accent="amarillo"
@@ -181,7 +195,7 @@ export function GuiaRwaPage() {
             <p className="text-xs font-semibold tracking-wider text-negro/45 uppercase">
               Private credit
             </p>
-            <MermaidDiagram chart={CHART_CREDIT} />
+            <MermaidDiagram chart={CHART_CREDIT} notes={NOTES_CREDIT} />
             <ConceptExpand
               term="Profundizar crédito"
               accent="naranja"
@@ -193,7 +207,7 @@ export function GuiaRwaPage() {
             <p className="text-xs font-semibold tracking-wider text-negro/45 uppercase">
               Real estate · demo RENT
             </p>
-            <MermaidDiagram chart={CHART_REAL_ESTATE} />
+            <MermaidDiagram chart={CHART_REAL_ESTATE} notes={NOTES_REAL_ESTATE} />
             <ConceptExpand
               term="Profundizar real estate"
               accent="verde"
@@ -224,6 +238,7 @@ export function GuiaRwaPage() {
       <ConceptSection id="ruta" title="5. Ruta de aprendizaje">
         <MermaidDiagram
           chart={CHART_RUTA}
+          notes={NOTES_RUTA}
           caption="Orden sugerido de estudio"
         />
         <div className="flex flex-wrap gap-2">
@@ -247,7 +262,7 @@ export function GuiaRwaPage() {
           Escenario bancario: depósito en el core → token on-chain (1 ≈ 1 COP)
           con KYC y redención. COPW en la demo es un mock pedagógico de esa idea.
         </p>
-        <MermaidDiagram chart={CHART_POC} caption="Flujo deposit token" />
+        <MermaidDiagram chart={CHART_POC} notes={NOTES_POC} caption="Flujo deposit token" />
         <div className="flex flex-wrap gap-2">
           <ConceptExpand
             term="Deposit token"
@@ -277,6 +292,7 @@ export function GuiaRwaPage() {
       <ConceptSection title="Idea clave">
         <MermaidDiagram
           chart={CHART_CLAVE}
+          notes={NOTES_CLAVE}
           caption="Tokenización = interoperabilidad mundo real ↔ blockchain"
         />
         <p className="border-l-4 border-amarillo pl-3 text-sm text-negro/65">
