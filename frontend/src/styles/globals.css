@@ -1,11 +1,76 @@
 @import "tailwindcss";
-@import "@fontsource/fraunces/600.css";
-@import "@fontsource/fraunces/700.css";
-@import "@fontsource/fraunces/800.css";
-@import "@fontsource/manrope/400.css";
-@import "@fontsource/manrope/500.css";
-@import "@fontsource/manrope/600.css";
-@import "@fontsource/manrope/700.css";
+
+/* CIBFontSans — tipografía del taller (woff2/) */
+@font-face {
+  font-family: "CIBFontSans";
+  src: url("../assets/fonts/cib/CIBFontSans-Thin.woff2") format("woff2");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "CIBFontSans";
+  src: url("../assets/fonts/cib/CIBFontSans-ThinItalic.woff2") format("woff2");
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "CIBFontSans";
+  src: url("../assets/fonts/cib/CIBFontSans-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "CIBFontSans";
+  src: url("../assets/fonts/cib/CIBFontSans-LightItalic.woff2") format("woff2");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "CIBFontSans";
+  src: url("../assets/fonts/cib/CIBFontSans-Book.woff2") format("woff2");
+  font-weight: 350;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "CIBFontSans";
+  src: url("../assets/fonts/cib/CIBFontSans-BookItalic.woff2") format("woff2");
+  font-weight: 350;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "CIBFontSans";
+  src: url("../assets/fonts/cib/CIBFontSans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "CIBFontSans";
+  src: url("../assets/fonts/cib/CIBFontSans-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "CIBFontSans";
+  src: url("../assets/fonts/cib/CIBFontSans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "CIBFontSans";
+  src: url("../assets/fonts/cib/CIBFontSans-BoldItalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
 
 @theme {
   --color-amarillo: #ffd204;
@@ -15,8 +80,69 @@
   --color-azul: #01cdeb;
   --color-negro: #2c2a29;
   --color-blanco: #f7f7f7;
-  --font-display: "Fraunces", Georgia, serif;
-  --font-sans: "Manrope", sans-serif;
+  --font-display: "CIBFontSans", sans-serif;
+  --font-sans: "CIBFontSans", sans-serif;
+}
+
+/*
+ * Reglas de uso de color (disciplina de paleta):
+ * - amarillo: única acción/estado primario (botón principal, activo, foco de marca).
+ * - naranja: solo énfasis tipográfico y avisos (no botones).
+ * - verde / azul / rosado: exclusivos para estado semántico (éxito, info, hitos)
+ *   o para los puntos de wayfinding del recorrido paso a paso. Nunca como fondo de botón.
+ */
+@layer components {
+  .container-app {
+    @apply mx-auto max-w-5xl px-4;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold tracking-[0.14em] text-negro/50 uppercase;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-amarillo px-5 py-2.5 text-sm font-bold tracking-tight text-negro transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 border border-negro/25 bg-transparent px-5 py-2.5 text-sm font-bold tracking-tight text-negro transition-colors hover:bg-negro/5 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 text-sm font-semibold text-negro/55 underline transition-colors hover:text-negro;
+  }
+
+  .card {
+    @apply border border-negro/10 bg-blanco p-5 md:p-6;
+  }
+
+  .link-accent {
+    @apply font-semibold text-negro underline decoration-azul decoration-2 underline-offset-2 hover:decoration-naranja;
+  }
+}
+
+/* Nodos clicables en diagramas Mermaid (ver MermaidDiagram.tsx). */
+.mmd-node--clickable {
+  cursor: pointer;
+  outline: none;
+}
+.mmd-node--clickable:hover rect,
+.mmd-node--clickable:hover polygon,
+.mmd-node--clickable:hover circle,
+.mmd-node--clickable:hover ellipse {
+  filter: brightness(0.94);
+}
+.mmd-node--clickable:focus-visible rect,
+.mmd-node--clickable:focus-visible polygon,
+.mmd-node--clickable:focus-visible circle,
+.mmd-node--clickable:focus-visible ellipse {
+  stroke: var(--color-amarillo);
+  stroke-width: 3;
+}
+.mmd-node--active rect,
+.mmd-node--active polygon,
+.mmd-node--active circle,
+.mmd-node--active ellipse {
+  stroke: var(--color-amarillo);
+  stroke-width: 3;
 }
 
 html,
@@ -28,15 +154,19 @@ body,
 body {
   margin: 0;
   font-family: var(--font-sans);
+  font-weight: 400;
   background: var(--color-blanco);
   color: var(--color-negro);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Títulos: menos tracking agresivo que con Syne */
 .font-display {
-  letter-spacing: -0.02em;
-  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
+}
+
+/* Bold cubre font-bold y font-extrabold (no hay 800 en CIB) */
+.font-extrabold {
+  font-weight: 700;
 }
 
 ::selection {
