@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+
+# Env
+.env
+frontend/.env
+contracts/.env
+*.pem
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Foundry
+contracts/lib/
+!contracts/lib/.gitkeep
+
+# Build
+frontend/dist/
+*.tsbuildinfo

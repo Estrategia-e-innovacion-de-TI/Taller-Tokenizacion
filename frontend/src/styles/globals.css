@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import "@fontsource/fraunces/600.css";
+@import "@fontsource/fraunces/700.css";
+@import "@fontsource/fraunces/800.css";
+@import "@fontsource/manrope/400.css";
+@import "@fontsource/manrope/500.css";
+@import "@fontsource/manrope/600.css";
+@import "@fontsource/manrope/700.css";
+
+@theme {
+  --color-amarillo: #ffd204;
+  --color-verde: #00c587;
+  --color-naranja: #ff803a;
+  --color-rosado: #ffb8d2;
+  --color-azul: #01cdeb;
+  --color-negro: #2c2a29;
+  --color-blanco: #f7f7f7;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Manrope", sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-blanco);
+  color: var(--color-negro);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Títulos: menos tracking agresivo que con Syne */
+.font-display {
+  letter-spacing: -0.02em;
+  font-optical-sizing: auto;
+}
+
+::selection {
+  background: var(--color-amarillo);
+  color: var(--color-negro);
+}

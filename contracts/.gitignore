@@ -1,0 +1,9 @@
+# Compiler files
+cache/
+out/
+
+# Broadcast logs (deploy receipts; keep local)
+broadcast/
+
+# Dotenv file
+.env
