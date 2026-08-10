@@ -20,7 +20,7 @@ export function ConceptosLayout() {
     loc.pathname.includes("guia-rwa") || loc.pathname.includes("enlaces");
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="container-app py-10">
       <h1 className="font-display text-3xl font-extrabold">Conceptos</h1>
       <p className="mt-2 text-negro/60">
         Lectura interactiva: clic en términos para profundizar. Sin

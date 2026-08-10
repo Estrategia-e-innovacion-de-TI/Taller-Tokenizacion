@@ -11,7 +11,7 @@ export function StepRail({
 }) {
   return (
     <nav className="sticky top-0 z-20 border-b border-negro/10 bg-blanco/95 backdrop-blur">
-      <ol className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 py-3">
+      <ol className="container-app flex gap-1 overflow-x-auto py-3">
         {steps.map((s) => {
           const isActive = s.id === active;
           return (

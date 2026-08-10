@@ -25,7 +25,7 @@ export function DeepLinks({
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-negro underline decoration-azul decoration-2 underline-offset-2 hover:decoration-naranja"
+              className="link-accent"
             >
               {item.label}
             </a>

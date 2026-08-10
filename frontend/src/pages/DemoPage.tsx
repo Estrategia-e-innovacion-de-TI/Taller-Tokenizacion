@@ -50,8 +50,8 @@ export function DemoPage() {
 
   return (
     <div>
-      <div className="mx-auto max-w-5xl px-4 py-10">
-        <p className="text-xs font-semibold tracking-[0.14em] text-naranja uppercase">
+      <div className="container-app py-10">
+        <p className="eyebrow text-naranja">
           Flujo práctico
         </p>
         <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight md:text-5xl">
@@ -105,7 +105,7 @@ export function DemoPage() {
               type="button"
               disabled={auth.connecting || !email}
               onClick={() => void auth.connectEmail(email)}
-              className="bg-negro px-5 py-2.5 text-sm font-semibold text-blanco disabled:opacity-40"
+              className="btn-primary"
             >
               Continuar con email
             </button>
@@ -114,7 +114,7 @@ export function DemoPage() {
             type="button"
             disabled={auth.connecting}
             onClick={() => void auth.connectWallet()}
-            className="mt-3 border border-negro/20 px-5 py-2.5 text-sm font-semibold hover:bg-negro/5"
+            className="btn-secondary mt-3"
           >
             Conectar billetera
           </button>
@@ -153,7 +153,7 @@ export function DemoPage() {
               await tx.faucet();
               await balances.refresh();
             }}
-            className="bg-azul px-5 py-2.5 text-sm font-bold text-negro disabled:opacity-40"
+            className="btn-primary"
           >
             Obtener {formatCopLabel(FAUCET_AMOUNT_COPW)}
           </button>
@@ -200,7 +200,7 @@ export function DemoPage() {
                 await tx.buyRent(BigInt(buyAmount));
                 await balances.refresh();
               }}
-              className="bg-naranja px-5 py-2.5 text-sm font-bold text-negro disabled:opacity-40"
+              className="btn-primary"
             >
               Comprar
             </button>
@@ -248,7 +248,7 @@ export function DemoPage() {
                 await tx.depositYield(BigInt(yieldMillions) * 1_000_000n * 100n);
                 await balances.refresh();
               }}
-              className="bg-rosado px-5 py-2.5 text-sm font-bold text-negro disabled:opacity-40"
+              className="btn-primary"
             >
               Depositar renta
             </button>
@@ -284,7 +284,7 @@ export function DemoPage() {
               await tx.claim();
               await balances.refresh();
             }}
-            className="bg-verde px-5 py-2.5 text-sm font-bold text-negro disabled:opacity-40"
+            className="btn-primary"
           >
             Claim pendiente
           </button>

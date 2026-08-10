@@ -6,7 +6,7 @@ import { formatCopLabel, truncateAddress } from "../../lib/format-cop";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `text-sm font-semibold tracking-wide ${
-    isActive ? "text-negro underline decoration-naranja decoration-2 underline-offset-4" : "text-negro/55 hover:text-negro"
+    isActive ? "text-negro underline decoration-amarillo decoration-2 underline-offset-4" : "text-negro/55 hover:text-negro"
   }`;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -16,7 +16,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       <header className="border-b border-negro/10">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
+        <div className="container-app flex flex-wrap items-center justify-between gap-4 py-4">
           <Link to="/" className="font-display text-lg font-extrabold tracking-tight">
             Taller <span className="text-naranja">RENT</span>
           </Link>
@@ -30,7 +30,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
         </div>
         <div className="border-t border-negro/5 bg-negro/[0.02]">
-          <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2 text-xs">
+          <div className="container-app flex flex-wrap items-center gap-x-6 gap-y-2 py-2 text-xs">
             <span className="rounded bg-verde/20 px-2 py-0.5 font-semibold text-negro">
               Gas patrocinado · no se usa ETH
             </span>
@@ -42,11 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </span>
                 <span>COPW {formatCopLabel(balances.copw)}</span>
                 <span>RENT {balances.rent.toString()}</span>
-                <button
-                  type="button"
-                  onClick={auth.disconnect}
-                  className="text-negro/50 underline"
-                >
+                <button type="button" onClick={auth.disconnect} className="btn-ghost">
                   Salir
                 </button>
               </>

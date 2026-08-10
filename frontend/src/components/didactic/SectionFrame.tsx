@@ -31,7 +31,7 @@ export function SectionFrame({
 }: Props) {
   return (
     <section className="border-b border-negro/10 py-12 md:py-16">
-      <div className="mx-auto grid max-w-5xl gap-8 px-4 md:grid-cols-[1.4fr_1fr] md:gap-12">
+      <div className="container-app grid gap-8 md:grid-cols-[1.4fr_1fr] md:gap-12">
         <div>
           <div className="mb-4 flex items-center gap-3">
             <span
@@ -49,11 +49,7 @@ export function SectionFrame({
           </p>
           <div className="mt-8">{children}</div>
         </div>
-        {aside ? (
-          <aside className="border border-negro/10 bg-blanco p-5 md:p-6">
-            {aside}
-          </aside>
-        ) : null}
+        {aside ? <aside className="card">{aside}</aside> : null}
       </div>
     </section>
   );
