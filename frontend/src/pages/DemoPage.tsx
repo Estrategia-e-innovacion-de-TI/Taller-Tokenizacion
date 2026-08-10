@@ -34,9 +34,55 @@ function WhatHappens({ children }: { children: React.ReactNode }) {
   );
 }
 
+function PublicAddress({
+  label,
+  address,
+  hint,
+}: {
+  label: string;
+  address: string;
+  hint?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <div className="border border-negro/10 bg-blanco p-3">
+      <p className="text-xs font-semibold tracking-wider text-negro/45 uppercase">
+        {label}
+      </p>
+      {hint ? <p className="mt-1 text-xs text-negro/55">{hint}</p> : null}
+      <p className="mt-2 break-all font-mono text-sm text-negro">{address}</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button type="button" onClick={() => void copy()} className="btn-ghost text-xs">
+          {copied ? "Copiada" : "Copiar"}
+        </button>
+        <a
+          className="btn-ghost text-xs"
+          href={`https://sepolia.etherscan.io/address/${address}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Ver en Etherscan
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export function DemoPage() {
   const [active, setActive] = useState("cuenta");
   const [email, setEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
   const [buyAmount, setBuyAmount] = useState(1);
   const [yieldMillions, setYieldMillions] = useState(1);
   const auth = useAuth();
@@ -76,43 +122,99 @@ export function DemoPage() {
           code="01"
           label="Cuenta"
           title="Entra con email o billetera"
-          subtitle="Misma smart account al final. Sin seed phrase obligatoria."
+          subtitle="Email con gas patrocinado, o MetaMask pagando su propio gas."
           accent="amarillo"
           aside={
             <WhatHappens>
               <p>
-                <strong>Email:</strong> Turnkey crea una key embebida (Auth Proxy).
+                <strong>Email:</strong> Turnkey firma; Kernel + Pimlico pagan el gas.
+                La address visible es la smart account (no el owner).
               </p>
               <p>
-                <strong>Billetera:</strong> MetaMask u otra injected firma como owner.
+                <strong>MetaMask:</strong> firmas como EOA y pagas ETH de Sepolia. Sin patrocinio.
               </p>
-              <p>Ambas vías apuntan a una cuenta inteligente con gas patrocinado.</p>
             </WhatHappens>
           }
         >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <label className="flex-1 text-sm">
-              Correo
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@banco.com"
-                className="mt-1 w-full border border-negro/15 bg-white px-3 py-2 outline-none focus:border-azul"
-              />
-            </label>
-            <button
-              type="button"
-              disabled={auth.connecting || !email}
-              onClick={() => void auth.connectEmail(email)}
-              className="btn-primary"
-            >
-              Continuar con email
-            </button>
-          </div>
+          {!auth.pendingEmailOtp ? (
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <label className="flex-1 text-sm">
+                Correo
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@banco.com"
+                  disabled={auth.isConnected}
+                  className="mt-1 w-full border border-negro/15 bg-white px-3 py-2 outline-none focus:border-azul disabled:opacity-60"
+                />
+              </label>
+              <button
+                type="button"
+                disabled={auth.connecting || !email || auth.isConnected}
+                onClick={() => void auth.connectEmail(email)}
+                className="btn-primary"
+              >
+                Continuar con email
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-negro/70">
+                Enviamos un código a <strong>{auth.pendingEmailOtp}</strong>.
+                Revísalo e ingrésalo abajo.
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <label className="flex-1 text-sm">
+                  Código OTP
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    placeholder="000000"
+                    className="mt-1 w-full border border-negro/15 bg-white px-3 py-2 font-mono tracking-widest outline-none focus:border-azul"
+                  />
+                </label>
+                <button
+                  type="button"
+                  disabled={auth.connecting || otpCode.trim().length < 6}
+                  onClick={() => void auth.verifyEmailOtp(otpCode)}
+                  className="btn-primary"
+                >
+                  Verificar código
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  disabled={auth.connecting}
+                  onClick={() => {
+                    setOtpCode("");
+                    void auth.connectEmail(auth.pendingEmailOtp!);
+                  }}
+                  className="btn-ghost text-sm"
+                >
+                  Reenviar código
+                </button>
+                <button
+                  type="button"
+                  disabled={auth.connecting}
+                  onClick={() => {
+                    setOtpCode("");
+                    auth.cancelEmailOtp();
+                  }}
+                  className="btn-ghost text-sm"
+                >
+                  Cambiar correo
+                </button>
+              </div>
+            </div>
+          )}
           <button
             type="button"
-            disabled={auth.connecting}
+            disabled={auth.connecting || auth.isConnected}
             onClick={() => void auth.connectWallet()}
             className="btn-secondary mt-3"
           >
@@ -121,10 +223,38 @@ export function DemoPage() {
           {auth.error ? (
             <p className="mt-3 text-sm text-naranja">{auth.error}</p>
           ) : null}
-          {auth.isConnected ? (
-            <p className="mt-3 text-sm text-verde">
-              Conectado ({auth.mode}). Puedes seguir al faucet.
-            </p>
+          {auth.isConnected && auth.smartAccountAddress ? (
+            <div className="mt-4 space-y-3">
+              <p className="text-sm text-verde">
+                Conectado
+                {auth.mode === "email" && auth.email ? ` · ${auth.email}` : ""}
+                {auth.mode === "wallet" ? " · MetaMask" : ""}. Puedes seguir al
+                faucet.
+              </p>
+              <PublicAddress
+                label={
+                  auth.mode === "email"
+                    ? "Dirección pública de tu cuenta"
+                    : "Dirección pública"
+                }
+                address={auth.smartAccountAddress}
+                hint={
+                  auth.mode === "email"
+                    ? "Smart account Kernel ligada al correo. Aquí llegan COPW y RENT."
+                    : "EOA de MetaMask (pagas gas)."
+                }
+              />
+              {auth.mode === "email" &&
+              auth.ownerAddress &&
+              auth.ownerAddress.toLowerCase() !==
+                auth.smartAccountAddress.toLowerCase() ? (
+                <PublicAddress
+                  label="Owner Turnkey (firma)"
+                  address={auth.ownerAddress}
+                  hint={`Creada con el correo${auth.email ? ` ${auth.email}` : ""}. Firma las UserOps; no guarda los tokens.`}
+                />
+              ) : null}
+            </div>
           ) : null}
         </SectionFrame>
       </div>

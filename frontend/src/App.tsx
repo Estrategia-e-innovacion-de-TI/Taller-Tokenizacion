@@ -1,5 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { TurnkeyProvider } from "@turnkey/react-wallet-kit";
+import "@turnkey/react-wallet-kit/styles.css";
 import { AuthProvider } from "./lib/auth";
+import { turnkeyConfig } from "./lib/turnkey-config";
 import { AppShell } from "./components/shell/AppShell";
 import { HomePage } from "./pages/HomePage";
 import { DemoPage } from "./pages/DemoPage";
@@ -16,25 +19,30 @@ import {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
-        <AppShell>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/demo" element={<DemoPage />} />
-            <Route path="/laboratorio/*" element={<Navigate to="/demo" replace />} />
-            <Route path="/conceptos" element={<ConceptosLayout />}>
-              <Route path="guia-rwa" element={<GuiaRwaPage />} />
-              <Route path="tokenizacion" element={<ConceptoTokenizacion />} />
-              <Route path="casos-banca" element={<ConceptoCasosBanca />} />
-              <Route path="copw" element={<ConceptoCopw />} />
-              <Route path="account-abstraction" element={<ConceptoAA />} />
-              <Route path="contratos" element={<ConceptoContratos />} />
-              <Route path="enlaces" element={<EnlacesPage />} />
-            </Route>
-          </Routes>
-        </AppShell>
-      </BrowserRouter>
-    </AuthProvider>
+    <TurnkeyProvider config={turnkeyConfig}>
+      <AuthProvider>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <AppShell>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/demo" element={<DemoPage />} />
+              <Route
+                path="/laboratorio/*"
+                element={<Navigate to="/demo" replace />}
+              />
+              <Route path="/conceptos" element={<ConceptosLayout />}>
+                <Route path="guia-rwa" element={<GuiaRwaPage />} />
+                <Route path="tokenizacion" element={<ConceptoTokenizacion />} />
+                <Route path="casos-banca" element={<ConceptoCasosBanca />} />
+                <Route path="copw" element={<ConceptoCopw />} />
+                <Route path="account-abstraction" element={<ConceptoAA />} />
+                <Route path="contratos" element={<ConceptoContratos />} />
+                <Route path="enlaces" element={<EnlacesPage />} />
+              </Route>
+            </Routes>
+          </AppShell>
+        </BrowserRouter>
+      </AuthProvider>
+    </TurnkeyProvider>
   );
 }

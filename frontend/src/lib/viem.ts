@@ -1,4 +1,11 @@
-import { createPublicClient, custom, type Address, type Hex } from "viem";
+import {
+  createPublicClient,
+  custom,
+  http,
+  type Address,
+  type Hex,
+  type PublicClient,
+} from "viem";
 import { sepolia } from "viem/chains";
 import copwArtifact from "./abis/COPW.json";
 import rentArtifact from "./abis/RENT.json";
@@ -10,7 +17,10 @@ export const chain = sepolia;
 
 export const SEPOLIA_CHAIN_ID_HEX = `0x${sepolia.id.toString(16)}` as const;
 
-export type BrowserPublicClient = ReturnType<typeof createBrowserPublicClient>;
+/** Lecturas on-chain (MetaMask custom o HTTP público). */
+export type AppPublicClient = PublicClient;
+/** @deprecated Prefer AppPublicClient */
+export type BrowserPublicClient = AppPublicClient;
 
 /**
  * Public client vía RPC de la billetera del navegador (MetaMask).
@@ -24,6 +34,18 @@ export function createBrowserPublicClient() {
   return createPublicClient({
     chain,
     transport: custom(window.ethereum),
+  });
+}
+
+/**
+ * Public client HTTP (login email / sin MetaMask).
+ * Opcional: VITE_SEPOLIA_RPC_URL; si no, usa el RPC por defecto de Sepolia (viem).
+ */
+export function createHttpPublicClient() {
+  const rpc = import.meta.env.VITE_SEPOLIA_RPC_URL as string | undefined;
+  return createPublicClient({
+    chain,
+    transport: http(rpc || undefined),
   });
 }
 
@@ -90,10 +112,15 @@ export type TxStatus =
   | "confirmed"
   | "error";
 
+export type GasMode = "wallet" | "sponsored" | "email";
+
 export type TxExplainerState = {
   status: TxStatus;
   title: string;
   detail: string;
   hash?: Hex;
   error?: string;
+  /** true solo con login email + Pimlico; MetaMask siempre false */
+  gasSponsored?: boolean;
+  gasMode?: GasMode;
 };

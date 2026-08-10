@@ -6,11 +6,11 @@ import {
   type Hex,
 } from "viem";
 import { useAuth } from "./auth";
+import { chain } from "./viem";
 import {
   abis,
   addresses,
   contractsConfigured,
-  pimlicoApiKey,
   type TxExplainerState,
 } from "./viem";
 
@@ -21,15 +21,17 @@ const idleExplainer = (title = ""): TxExplainerState => ({
 });
 
 /**
- * Ejecuta llamadas vía wallet client.
- * Con Pimlico se reemplaza por UserOps sponsoreadas (Kernel).
- * Hoy: firma + envío; el TxExplainer educa el flujo gasless cuando Pimlico está activo.
+ * MetaMask: sendTransaction EOA (pagas gas).
+ * Email: Kernel UserOp + paymaster Pimlico (gas patrocinado).
  */
 export function useWorkshopTx() {
   const auth = useAuth();
   const [explainer, setExplainer] = useState<TxExplainerState>(idleExplainer());
 
   const resetExplainer = useCallback(() => setExplainer(idleExplainer()), []);
+
+  const gasSponsored =
+    auth.mode === "email" && Boolean(auth.smartAccountClient);
 
   const run = useCallback(
     async (opts: {
@@ -39,12 +41,17 @@ export function useWorkshopTx() {
       data: Hex;
       functionLabel: string;
     }) => {
-      if (!auth.walletClient || !auth.smartAccountAddress || !auth.publicClient) {
+      const connected =
+        auth.mode === "email"
+          ? Boolean(auth.smartAccountClient && auth.smartAccountAddress)
+          : Boolean(auth.walletClient && auth.smartAccountAddress);
+
+      if (!connected || !auth.publicClient) {
         setExplainer({
           status: "error",
           title: opts.title,
           detail: opts.detail,
-          error: "Conecta una billetera primero (RPC vía MetaMask).",
+          error: "Conecta con email o billetera primero.",
         });
         return null;
       }
@@ -59,43 +66,82 @@ export function useWorkshopTx() {
         return null;
       }
 
+      const sponsored =
+        auth.mode === "email" && Boolean(auth.smartAccountClient);
+      const gasMode =
+        auth.mode === "wallet"
+          ? ("wallet" as const)
+          : sponsored
+            ? ("sponsored" as const)
+            : ("email" as const);
+
       setExplainer({
         status: "preparing",
         title: opts.title,
         detail: `${opts.detail} · Función: ${opts.functionLabel}`,
+        gasSponsored: sponsored,
+        gasMode,
       });
 
       try {
-        setExplainer((s) => ({
-          ...s,
-          status: "signing",
-          detail: pimlicoApiKey
-            ? "Firma la UserOperation — no pagas ETH (Pimlico patrocina el gas)."
-            : "Firma la transacción. Configura VITE_PIMLICO_API_KEY para gas patrocinado completo.",
-        }));
+        let hash: Hash;
 
-        if (pimlicoApiKey) {
+        if (sponsored && auth.smartAccountClient) {
+          setExplainer((s) => ({
+            ...s,
+            status: "signing",
+            gasSponsored: true,
+            gasMode: "sponsored",
+            detail:
+              "Firma la UserOperation (Turnkey) — Pimlico patrocina el gas.",
+          }));
           setExplainer((s) => ({
             ...s,
             status: "sponsored",
             detail: "Paymaster Pimlico cubre el gas · enviando UserOperation…",
           }));
-          // TODO: createKernelAccountClient + sendUserOperation con pimlico
-          // Fallback temporal: wallet send mientras se cablea Kernel.
-        }
 
-        const hash = (await auth.walletClient.sendTransaction({
-          account: auth.ownerAddress!,
-          to: opts.to,
-          data: opts.data,
-          chain: auth.walletClient.chain,
-        })) as Hash;
+          hash = (await auth.smartAccountClient.sendTransaction({
+            account: auth.smartAccountClient.account,
+            chain,
+            to: opts.to,
+            data: opts.data,
+            value: 0n,
+          })) as Hash;
+        } else if (auth.mode === "wallet" && auth.walletClient) {
+          setExplainer((s) => ({
+            ...s,
+            status: "signing",
+            gasSponsored: false,
+            gasMode: "wallet",
+            detail:
+              "Firma en MetaMask. Pagas el gas en ETH de Sepolia (sin patrocinio).",
+          }));
+
+          const account = auth.walletClient.account;
+          if (!account) {
+            throw new Error("No hay cuenta asociada al wallet client.");
+          }
+
+          hash = (await auth.walletClient.sendTransaction({
+            account,
+            to: opts.to,
+            data: opts.data,
+            chain: auth.walletClient.chain,
+          })) as Hash;
+        } else {
+          throw new Error(
+            "Login email sin smart account patrocinada. Reconecta el correo (hace falta VITE_PIMLICO_API_KEY).",
+          );
+        }
 
         setExplainer({
           status: "submitted",
           title: opts.title,
           detail: `Enviada · ${opts.functionLabel}`,
           hash,
+          gasSponsored: sponsored,
+          gasMode,
         });
 
         await auth.publicClient.waitForTransactionReceipt({ hash });
@@ -105,6 +151,8 @@ export function useWorkshopTx() {
           title: opts.title,
           detail: `Confirmada · ${opts.functionLabel}`,
           hash,
+          gasSponsored: sponsored,
+          gasMode,
         });
         return hash;
       } catch (e) {
@@ -113,6 +161,8 @@ export function useWorkshopTx() {
           title: opts.title,
           detail: opts.detail,
           error: e instanceof Error ? e.message : "Transacción fallida",
+          gasSponsored: sponsored,
+          gasMode,
         });
         return null;
       }
@@ -207,5 +257,13 @@ export function useWorkshopTx() {
     });
   }, [run]);
 
-  return { explainer, resetExplainer, faucet, buyRent, depositYield, claim };
+  return {
+    explainer,
+    resetExplainer,
+    faucet,
+    buyRent,
+    depositYield,
+    claim,
+    gasSponsored,
+  };
 }

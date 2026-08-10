@@ -31,15 +31,36 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <div className="border-t border-negro/5 bg-negro/[0.02]">
           <div className="container-app flex flex-wrap items-center gap-x-6 gap-y-2 py-2 text-xs">
-            <span className="rounded bg-verde/20 px-2 py-0.5 font-semibold text-negro">
-              Gas patrocinado · no se usa ETH
+            <span
+              className={`rounded px-2 py-0.5 font-semibold text-negro ${
+                auth.mode === "email"
+                  ? "bg-verde/20"
+                  : auth.mode === "wallet"
+                    ? "bg-naranja/15"
+                    : "bg-negro/5"
+              }`}
+            >
+              {auth.mode === "email"
+                ? "Email · gas patrocinado"
+                : auth.mode === "wallet"
+                  ? "MetaMask · pagas gas"
+                  : "Gas: email patrocinado · MetaMask no"}
             </span>
             <span className="text-negro/55">Sepolia</span>
             {auth.isConnected ? (
               <>
-                <span className="font-mono text-negro/80">
-                  {truncateAddress(auth.smartAccountAddress!)}
+                <span className="text-negro/45">
+                  {auth.mode === "email" ? "Cuenta email" : "Cuenta"}
                 </span>
+                <a
+                  className="font-mono text-negro/90 underline decoration-negro/20 underline-offset-2 hover:decoration-azul"
+                  href={`https://sepolia.etherscan.io/address/${auth.smartAccountAddress}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={auth.smartAccountAddress!}
+                >
+                  {truncateAddress(auth.smartAccountAddress!, 6)}
+                </a>
                 <span>COPW {formatCopLabel(balances.copw)}</span>
                 <span>RENT {balances.rent.toString()}</span>
                 <button type="button" onClick={auth.disconnect} className="btn-ghost">

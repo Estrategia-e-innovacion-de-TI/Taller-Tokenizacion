@@ -10,8 +10,20 @@ const statusLabel: Record<TxExplainerState["status"], string> = {
   error: "Error",
 };
 
+const gasHint: Record<NonNullable<TxExplainerState["gasMode"]>, string> = {
+  sponsored: "Gas patrocinado · no se usa ETH",
+  wallet: "MetaMask · pagas ETH de Sepolia",
+  email: "Email · firma Turnkey (ETH si no hay paymaster)",
+};
+
 export function TxExplainer({ state }: { state: TxExplainerState }) {
   if (state.status === "idle" && !state.title) return null;
+
+  const hint =
+    (state.gasMode && gasHint[state.gasMode]) ||
+    (state.gasSponsored
+      ? gasHint.sponsored
+      : "Gas según modo de conexión");
 
   return (
     <div className="mt-6 border border-negro/10 bg-blanco p-4">
@@ -32,7 +44,7 @@ export function TxExplainer({ state }: { state: TxExplainerState }) {
         >
           {statusLabel[state.status]}
         </span>
-        <span className="text-xs text-negro/50">Gas patrocinado · no se usa ETH</span>
+        <span className="text-xs text-negro/50">{hint}</span>
       </div>
       {state.title ? (
         <p className="mt-2 font-display text-sm font-bold">{state.title}</p>

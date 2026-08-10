@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const stats = [
   { label: "Valor del inmueble", value: "5.000 M COP" },
   { label: "Participación mínima", value: "100.000 COP · 1 RENT" },
-  { label: "Costo de gas", value: "Patrocinado · 0 ETH" },
+  { label: "Costo de gas", value: "Email 0 ETH · MetaMask paga" },
 ];
 
 export function HomePage() {
@@ -18,8 +18,8 @@ export function HomePage() {
         </h1>
         <p className="mt-6 max-w-xl text-lg text-negro/65">
           Inmueble de 5.000 millones de pesos, participación desde 100.000 COP,
-          rentas proporcionales. Billetera embebida o caliente, sin pagar ETH de
-          gas.
+          rentas proporcionales. Con email el gas lo patrocina la demo; con
+          MetaMask pagas ETH de Sepolia.
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-3">
           <Link to="/demo" className="btn-primary">

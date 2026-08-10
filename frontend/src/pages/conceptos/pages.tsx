@@ -237,12 +237,13 @@ export function ConceptoAA() {
     <>
       <h2 className="font-display text-xl font-bold">Account abstraction</h2>
       <p>
-        ERC-4337: el usuario firma una <em>UserOperation</em>; un bundler la
-        incluye en bloque. Un <em>paymaster</em> (Pimlico) paga el gas.
+        ERC-4337: con login por email el usuario firma una <em>UserOperation</em>;
+        un bundler la incluye en bloque y un <em>paymaster</em> (Pimlico) paga el
+        gas.
       </p>
       <p>
-        Por eso en la demo no necesitas ETH: solo apruebas y observas el
-        TxExplainer.
+        Si entras con MetaMask, no hay patrocinio: firmas como EOA y pagas ETH de
+        Sepolia. El paymaster aplica solo a la vía embebida (Turnkey).
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -255,13 +256,13 @@ export function ConceptoAA() {
         <ConceptExpand
           term="Paymaster"
           accent="verde"
-          summary="Contrato que patrocina el gas. En la demo, Pimlico cubre Sepolia para que el ejecutivo no compre ETH de testnet."
+          summary="Contrato que patrocina el gas solo en la vía email. Con MetaMask el usuario paga gas; Pimlico no interviene."
           links={enlaces("pimlico", "permissionless")}
         />
         <ConceptExpand
           term="Turnkey / embedded"
           accent="amarillo"
-          summary="Billetera embebida vía email (Auth Proxy): la UX bancaria típica evita seed phrases en manos del ejecutivo."
+          summary="Billetera embebida vía email (Auth Proxy): UX bancaria sin seed phrase, y es la vía con gas patrocinado."
           links={enlaces("turnkey")}
         />
       </div>
