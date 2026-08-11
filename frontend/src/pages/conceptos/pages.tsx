@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ConceptExpand } from "../../components/didactic/ConceptExpand";
+import { ContractLinks } from "../../components/didactic/ContractLinks";
 import { DeepLinks } from "../../components/didactic/DeepLinks";
 import { enlaces } from "../../data/enlaces";
 
@@ -302,6 +303,10 @@ export function ConceptoContratos() {
         Código en <code>contracts/src</code> (Foundry). Sin super-admin:
         cualquiera puede faucet, comprar, depositar renta y claim.
       </p>
+
+      <div className="mt-6">
+        <ContractLinks />
+      </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
         <ConceptExpand

@@ -86,6 +86,17 @@ export const addresses = {
   distributor: (import.meta.env.VITE_DISTRIBUTOR_ADDRESS || "") as Address,
 };
 
+/** Explorer Sepolia (Etherscan). */
+export const SEPOLIA_EXPLORER = "https://sepolia.etherscan.io";
+
+export function sepoliaAddressUrl(address: string): string {
+  return `${SEPOLIA_EXPLORER}/address/${address}`;
+}
+
+export function sepoliaTxUrl(hash: string): string {
+  return `${SEPOLIA_EXPLORER}/tx/${hash}`;
+}
+
 export const contractsConfigured =
   Boolean(addresses.copw) &&
   Boolean(addresses.rent) &&

@@ -17,6 +17,15 @@ export const ACCENT_CHIP: Record<Accent, string> = {
   azul: "border-azul bg-azul/25",
 };
 
+/** Barra corta de wayfinding sobre el título de cada paso. */
+export const ACCENT_BAR: Record<Accent, string> = {
+  amarillo: "bg-amarillo",
+  verde: "bg-verde",
+  naranja: "bg-naranja",
+  rosado: "bg-rosado",
+  azul: "bg-azul",
+};
+
 export const ACCENT_HEX: Record<Accent, string> = {
   amarillo: "#FFD204",
   verde: "#00C587",

@@ -1,14 +1,8 @@
 import type { ReactNode } from "react";
+import { StepHeader } from "./StepHeader";
+import type { Accent } from "./accent";
 
-const accentMap = {
-  amarillo: "bg-amarillo",
-  verde: "bg-verde",
-  naranja: "bg-naranja",
-  rosado: "bg-rosado",
-  azul: "bg-azul",
-} as const;
-
-export type Accent = keyof typeof accentMap;
+export type { Accent };
 
 type Props = {
   code: string;
@@ -16,40 +10,58 @@ type Props = {
   title: string;
   subtitle: string;
   accent: Accent;
+  /** Rótulo de la tarjeta de acción (izquierda). */
+  actionLabel?: string;
   children: ReactNode;
   aside?: ReactNode;
+  /** Bloque a ancho completo debajo de las dos columnas (tx, addresses). */
+  footer?: ReactNode;
 };
 
+/**
+ * Bloque de paso de la demo: encabezado, dos tarjetas de igual altura
+ * (acción | “Qué está pasando”) y un pie a ancho completo.
+ */
 export function SectionFrame({
   code,
   label,
   title,
   subtitle,
   accent,
+  actionLabel = "Acción",
   children,
   aside,
+  footer,
 }: Props) {
   return (
-    <section className="border-b border-negro/10 py-12 md:py-16">
-      <div className="container-app grid gap-8 md:grid-cols-[1.4fr_1fr] md:gap-12">
-        <div>
-          <div className="mb-4 flex items-center gap-3">
-            <span
-              className={`inline-flex h-2.5 w-2.5 rounded-full ${accentMap[accent]}`}
-            />
-            <span className="text-xs font-semibold tracking-[0.12em] text-negro/60 uppercase">
-              {code} · {label}
-            </span>
+    <section className="py-8 md:py-10">
+      <div className="container-app">
+        <StepHeader
+          eyebrow={`${code} · ${label}`}
+          title={title}
+          subtitle={subtitle}
+          accent={accent}
+        />
+
+        <div
+          className={`mt-8 grid gap-6 md:gap-8 ${
+            aside ? "md:grid-cols-2 md:items-stretch" : ""
+          }`}
+        >
+          <div className="flex min-w-0 flex-col border border-negro/10 bg-blanco p-5 md:p-6">
+            <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
+              {actionLabel}
+            </p>
+            <div className="mt-4 flex flex-col gap-4">{children}</div>
           </div>
-          <h2 className="font-display text-3xl font-extrabold tracking-tight text-negro md:text-4xl">
-            {title}
-          </h2>
-          <p className="mt-3 max-w-xl text-base leading-relaxed text-negro/70">
-            {subtitle}
-          </p>
-          <div className="mt-8">{children}</div>
+          {aside ? (
+            <aside className="min-w-0 border border-negro/10 bg-blanco p-5 md:p-6">
+              {aside}
+            </aside>
+          ) : null}
         </div>
-        {aside ? <aside className="card">{aside}</aside> : null}
+
+        {footer ? <div className="mt-6">{footer}</div> : null}
       </div>
     </section>
   );

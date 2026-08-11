@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../lib/auth";
 import { useBalances } from "../../lib/useBalances";
 import { formatCopLabel, truncateAddress } from "../../lib/format-cop";
+import { sepoliaAddressUrl } from "../../lib/viem";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `text-sm font-semibold tracking-wide ${
@@ -54,7 +55,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </span>
                 <a
                   className="font-mono text-negro/90 underline decoration-negro/20 underline-offset-2 hover:decoration-azul"
-                  href={`https://sepolia.etherscan.io/address/${auth.smartAccountAddress}`}
+                  href={sepoliaAddressUrl(auth.smartAccountAddress!)}
                   target="_blank"
                   rel="noreferrer"
                   title={auth.smartAccountAddress!}
