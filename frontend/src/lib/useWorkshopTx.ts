@@ -11,6 +11,7 @@ import {
   abis,
   addresses,
   contractsConfigured,
+  type GasMode,
   type TxExplainerState,
 } from "./viem";
 
@@ -20,9 +21,16 @@ const idleExplainer = (title = ""): TxExplainerState => ({
   detail: "",
 });
 
+type Call = {
+  to: Address;
+  data: Hex;
+  value?: bigint;
+};
+
 /**
- * MetaMask: sendTransaction EOA (pagas gas).
- * Email: Kernel UserOp + paymaster Pimlico (gas patrocinado).
+ * MetaMask: sendTransaction EOA (pagas gas), llamadas en serie.
+ * Email: Kernel UserOp + paymaster; varias llamadas van en un solo batch
+ * para evitar AA25 (nonce inválido entre UserOps seguidas).
  */
 export function useWorkshopTx() {
   const auth = useAuth();
@@ -33,12 +41,17 @@ export function useWorkshopTx() {
   const gasSponsored =
     auth.mode === "email" && Boolean(auth.smartAccountClient);
 
+  const busy =
+    explainer.status === "preparing" ||
+    explainer.status === "signing" ||
+    explainer.status === "sponsored" ||
+    explainer.status === "submitted";
+
   const run = useCallback(
     async (opts: {
       title: string;
       detail: string;
-      to: Address;
-      data: Hex;
+      calls: Call[];
       functionLabel: string;
     }) => {
       const connected =
@@ -65,20 +78,29 @@ export function useWorkshopTx() {
         });
         return null;
       }
+      if (opts.calls.length === 0) {
+        setExplainer({
+          status: "error",
+          title: opts.title,
+          detail: opts.detail,
+          error: "No hay llamadas para enviar.",
+        });
+        return null;
+      }
 
       const sponsored =
         auth.mode === "email" && Boolean(auth.smartAccountClient);
-      const gasMode =
+      const gasMode: GasMode =
         auth.mode === "wallet"
-          ? ("wallet" as const)
+          ? "wallet"
           : sponsored
-            ? ("sponsored" as const)
-            : ("email" as const);
+            ? "sponsored"
+            : "email";
 
       setExplainer({
         status: "preparing",
         title: opts.title,
-        detail: `${opts.detail} · Función: ${opts.functionLabel}`,
+        detail: `${opts.detail} · ${opts.functionLabel}`,
         gasSponsored: sponsored,
         gasMode,
       });
@@ -90,61 +112,88 @@ export function useWorkshopTx() {
           setExplainer((s) => ({
             ...s,
             status: "signing",
-            gasSponsored: true,
-            gasMode: "sponsored",
             detail:
-              "Firma la UserOperation (Turnkey) — Pimlico patrocina el gas.",
+              opts.calls.length > 1
+                ? "Firmando lote (approve + acción) con Turnkey…"
+                : "Firma la UserOperation (Turnkey) — Pimlico patrocina el gas.",
           }));
           setExplainer((s) => ({
             ...s,
             status: "sponsored",
-            detail: "Paymaster Pimlico cubre el gas · enviando UserOperation…",
+            detail:
+              opts.calls.length > 1
+                ? "Paymaster Pimlico · una UserOp con varias llamadas…"
+                : "Paymaster Pimlico cubre el gas · enviando UserOperation…",
           }));
 
-          hash = (await auth.smartAccountClient.sendTransaction({
+          const userOpHash = await auth.smartAccountClient.sendUserOperation({
             account: auth.smartAccountClient.account,
-            chain,
-            to: opts.to,
-            data: opts.data,
-            value: 0n,
-          })) as Hash;
+            calls: opts.calls.map((c) => ({
+              to: c.to,
+              data: c.data,
+              value: c.value ?? 0n,
+            })),
+          });
+
+          setExplainer((s) => ({
+            ...s,
+            status: "submitted",
+            detail: "UserOp enviada · esperando inclusión en bloque…",
+          }));
+
+          const receipt =
+            await auth.smartAccountClient.waitForUserOperationReceipt({
+              hash: userOpHash,
+            });
+          hash = receipt.receipt.transactionHash;
         } else if (auth.mode === "wallet" && auth.walletClient) {
+          const account = auth.walletClient.account;
+          if (!account) {
+            throw new Error("No hay cuenta asociada al wallet client.");
+          }
+
           setExplainer((s) => ({
             ...s,
             status: "signing",
             gasSponsored: false,
             gasMode: "wallet",
             detail:
-              "Firma en MetaMask. Pagas el gas en ETH de Sepolia (sin patrocinio).",
+              opts.calls.length > 1
+                ? "Firma en MetaMask (varias txs seguidas). Pagas gas en ETH."
+                : "Firma en MetaMask. Pagas el gas en ETH de Sepolia (sin patrocinio).",
           }));
 
-          const account = auth.walletClient.account;
-          if (!account) {
-            throw new Error("No hay cuenta asociada al wallet client.");
+          let lastHash: Hash | null = null;
+          for (let i = 0; i < opts.calls.length; i++) {
+            const call = opts.calls[i]!;
+            setExplainer((s) => ({
+              ...s,
+              status: "signing",
+              detail: `Firma en MetaMask (${i + 1}/${opts.calls.length})…`,
+            }));
+            lastHash = (await auth.walletClient.sendTransaction({
+              account,
+              to: call.to,
+              data: call.data,
+              value: call.value ?? 0n,
+              chain: auth.walletClient.chain ?? chain,
+            })) as Hash;
+            setExplainer((s) => ({
+              ...s,
+              status: "submitted",
+              hash: lastHash!,
+              detail: `Tx ${i + 1}/${opts.calls.length} enviada · esperando confirmación…`,
+            }));
+            await auth.publicClient.waitForTransactionReceipt({
+              hash: lastHash,
+            });
           }
-
-          hash = (await auth.walletClient.sendTransaction({
-            account,
-            to: opts.to,
-            data: opts.data,
-            chain: auth.walletClient.chain,
-          })) as Hash;
+          hash = lastHash!;
         } else {
           throw new Error(
             "Login email sin smart account patrocinada. Reconecta el correo (hace falta VITE_PIMLICO_API_KEY).",
           );
         }
-
-        setExplainer({
-          status: "submitted",
-          title: opts.title,
-          detail: `Enviada · ${opts.functionLabel}`,
-          hash,
-          gasSponsored: sponsored,
-          gasMode,
-        });
-
-        await auth.publicClient.waitForTransactionReceipt({ hash });
 
         setExplainer({
           status: "confirmed",
@@ -156,11 +205,15 @@ export function useWorkshopTx() {
         });
         return hash;
       } catch (e) {
+        const raw = e instanceof Error ? e.message : "Transacción fallida";
+        const friendly = raw.includes("AA25")
+          ? "Nonce de la smart account inválido (UserOp previa en curso o colisión). Espera unos segundos y reintenta; si persiste, Salir y vuelve a entrar con el correo."
+          : raw;
         setExplainer({
           status: "error",
           title: opts.title,
           detail: opts.detail,
-          error: e instanceof Error ? e.message : "Transacción fallida",
+          error: friendly,
           gasSponsored: sponsored,
           gasMode,
         });
@@ -174,41 +227,44 @@ export function useWorkshopTx() {
     return run({
       title: "Faucet COPW",
       detail: "Fondear cuenta con 5.000.000 COP de demo",
-      to: addresses.copw,
-      data: encodeFunctionData({
-        abi: abis.copw,
-        functionName: "faucet",
-      }),
+      calls: [
+        {
+          to: addresses.copw,
+          data: encodeFunctionData({
+            abi: abis.copw,
+            functionName: "faucet",
+          }),
+        },
+      ],
       functionLabel: "COPW.faucet()",
     });
   }, [run]);
 
   const buyRent = useCallback(
     async (amount: bigint) => {
-      const approveData = encodeFunctionData({
-        abi: abis.copw,
-        functionName: "approve",
-        args: [addresses.sale, amount * 100_000n * 100n],
-      });
-      const approved = await run({
-        title: "Aprobar COPW",
-        detail: "Permitir a PropertySale usar tus COPW",
-        to: addresses.copw,
-        data: approveData,
-        functionLabel: "COPW.approve(sale, cost)",
-      });
-      if (!approved) return null;
-
+      const cost = amount * 100_000n * 100n;
       return run({
         title: "Comprar RENT",
-        detail: `Comprar ${amount.toString()} RENT`,
-        to: addresses.sale,
-        data: encodeFunctionData({
-          abi: abis.sale,
-          functionName: "buy",
-          args: [amount],
-        }),
-        functionLabel: "PropertySale.buy(amount)",
+        detail: `Aprobar COPW y comprar ${amount.toString()} RENT`,
+        calls: [
+          {
+            to: addresses.copw,
+            data: encodeFunctionData({
+              abi: abis.copw,
+              functionName: "approve",
+              args: [addresses.sale, cost],
+            }),
+          },
+          {
+            to: addresses.sale,
+            data: encodeFunctionData({
+              abi: abis.sale,
+              functionName: "buy",
+              args: [amount],
+            }),
+          },
+        ],
+        functionLabel: "approve + PropertySale.buy (lote)",
       });
     },
     [run],
@@ -216,29 +272,28 @@ export function useWorkshopTx() {
 
   const depositYield = useCallback(
     async (amountCopw: bigint) => {
-      const approved = await run({
-        title: "Aprobar COPW (renta)",
-        detail: "Permitir al YieldDistributor recibir la renta",
-        to: addresses.copw,
-        data: encodeFunctionData({
-          abi: abis.copw,
-          functionName: "approve",
-          args: [addresses.distributor, amountCopw],
-        }),
-        functionLabel: "COPW.approve(distributor, amount)",
-      });
-      if (!approved) return null;
-
       return run({
         title: "Depositar renta",
-        detail: "Fondear el mes de rendimientos",
-        to: addresses.distributor,
-        data: encodeFunctionData({
-          abi: abis.distributor,
-          functionName: "depositYield",
-          args: [amountCopw],
-        }),
-        functionLabel: "YieldDistributor.depositYield(amount)",
+        detail: "Aprobar COPW y fondear el mes de rendimientos",
+        calls: [
+          {
+            to: addresses.copw,
+            data: encodeFunctionData({
+              abi: abis.copw,
+              functionName: "approve",
+              args: [addresses.distributor, amountCopw],
+            }),
+          },
+          {
+            to: addresses.distributor,
+            data: encodeFunctionData({
+              abi: abis.distributor,
+              functionName: "depositYield",
+              args: [amountCopw],
+            }),
+          },
+        ],
+        functionLabel: "approve + depositYield (lote)",
       });
     },
     [run],
@@ -248,22 +303,58 @@ export function useWorkshopTx() {
     return run({
       title: "Claim de renta",
       detail: "Retirar rendimientos proporcionales a tu RENT",
-      to: addresses.distributor,
-      data: encodeFunctionData({
-        abi: abis.distributor,
-        functionName: "claim",
-      }),
+      calls: [
+        {
+          to: addresses.distributor,
+          data: encodeFunctionData({
+            abi: abis.distributor,
+            functionName: "claim",
+          }),
+        },
+      ],
       functionLabel: "YieldDistributor.claim()",
     });
   }, [run]);
 
+  const transferRent = useCallback(
+    async (to: Address, amount: bigint) => {
+      if (amount <= 0n) {
+        setExplainer({
+          status: "error",
+          title: "Transferir RENT",
+          detail: "Mercado secundario P2P",
+          error: "La cantidad debe ser al menos 1 RENT.",
+        });
+        return null;
+      }
+      return run({
+        title: "Transferir RENT",
+        detail: `Enviar ${amount.toString()} RENT a ${to}`,
+        calls: [
+          {
+            to: addresses.rent,
+            data: encodeFunctionData({
+              abi: abis.rent,
+              functionName: "transfer",
+              args: [to, amount],
+            }),
+          },
+        ],
+        functionLabel: "RENT.transfer(to, amount)",
+      });
+    },
+    [run],
+  );
+
   return {
     explainer,
     resetExplainer,
+    busy,
     faucet,
     buyRent,
     depositYield,
     claim,
+    transferRent,
     gasSponsored,
   };
 }
