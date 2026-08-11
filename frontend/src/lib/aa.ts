@@ -1,18 +1,22 @@
-import { createSmartAccountClient } from "permissionless";
+import {
+  createSmartAccountClient,
+  type SmartAccountClient,
+} from "permissionless";
 import { toKernelSmartAccount } from "permissionless/accounts";
 import { createPimlicoClient } from "permissionless/clients/pimlico";
 import {
   entryPoint07Address,
   type SmartAccount,
 } from "viem/account-abstraction";
-import { http, type Address, type LocalAccount } from "viem";
+import { http, type Address, type LocalAccount, type Transport } from "viem";
 import { chain, createHttpPublicClient, pimlicoApiKey } from "./viem";
 
-export type SponsoredSmartAccountClient = ReturnType<
-  typeof createSmartAccountClient
-> & {
-  account: SmartAccount;
-};
+/** Cliente tipado con account definido (evita params `never` en sendUserOperation). */
+export type SponsoredSmartAccountClient = SmartAccountClient<
+  Transport,
+  typeof chain,
+  SmartAccount
+>;
 
 function pimlicoRpcUrl(): string {
   if (!pimlicoApiKey) {
@@ -61,7 +65,7 @@ export async function createSponsoredKernelClient(owner: LocalAccount): Promise<
       estimateFeesPerGas: async () =>
         (await paymasterClient.getUserOperationGasPrice()).fast,
     },
-  }) as SponsoredSmartAccountClient;
+  });
 
   return { client, address: kernelAccount.address };
 }

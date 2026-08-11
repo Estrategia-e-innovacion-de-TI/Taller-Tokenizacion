@@ -127,7 +127,6 @@ export function useWorkshopTx() {
           }));
 
           const userOpHash = await auth.smartAccountClient.sendUserOperation({
-            account: auth.smartAccountClient.account,
             calls: opts.calls.map((c) => ({
               to: c.to,
               data: c.data,
