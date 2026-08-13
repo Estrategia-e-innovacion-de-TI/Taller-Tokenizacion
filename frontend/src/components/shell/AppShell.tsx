@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </a>
                 <span>COPW {formatCopLabel(balances.copw)}</span>
                 <span>RENT {balances.rent.toString()}</span>
-                <button type="button" onClick={auth.disconnect} className="btn-ghost">
+                <button type="button" onClick={auth.disconnect} className="btn-secondary text-xs">
                   Salir
                 </button>
               </>

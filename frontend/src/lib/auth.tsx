@@ -24,7 +24,10 @@ import {
   type WalletClient,
 } from "viem";
 import { turnkeyConfigured } from "./turnkey-config";
-import { createSponsoredKernelClient, type SponsoredSmartAccountClient } from "./aa";
+import {
+  createSponsoredKernelClient,
+  type SponsoredSmartAccountClient,
+} from "./aa";
 import {
   chain,
   createBrowserPublicClient,
@@ -58,6 +61,9 @@ type AuthContextValue = Session & {
   error: string | null;
   /** Email awaiting OTP verification, if any. */
   pendingEmailOtp: string | null;
+  /** Turnkey ClientState: loading | ready | error */
+  turnkeyReady: boolean;
+  turnkeyClientState: string | undefined;
   connectEmail: (email: string) => Promise<void>;
   verifyEmailOtp: (otpCode: string) => Promise<void>;
   cancelEmailOtp: () => void;
@@ -76,6 +82,59 @@ const empty: Session = {
   smartAccountClient: null,
   publicClient: null,
 };
+
+/** Sin espacios; conserva alfanumérico (Turnkey puede configurar OTP no solo numérico). */
+function normalizeOtpCode(raw: string): string {
+  return raw.replace(/\s+/g, "").trim();
+}
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function formatAuthError(e: unknown, fallback: string): string {
+  if (!(e instanceof Error)) return fallback;
+
+  const withExtras = e as Error & { code?: string; cause?: unknown };
+  const causeMsg =
+    withExtras.cause instanceof Error
+      ? withExtras.cause.message
+      : typeof withExtras.cause === "string"
+        ? withExtras.cause
+        : "";
+  const raw = [e.message, causeMsg].filter(Boolean).join(" · ");
+  const lower = raw.toLowerCase();
+
+  if (
+    withExtras.code === "INVALID_OTP_CODE" ||
+    lower.includes("invalid otp") ||
+    lower.includes("otp code is invalid")
+  ) {
+    return "Código OTP inválido o vencido. Pulsa «Reenviar código» e usa el más reciente del correo.";
+  }
+
+  if (
+    lower.includes("failed to verify otp") ||
+    lower.includes("otp verification failed") ||
+    lower.includes("failed to complete otp")
+  ) {
+    return "No se pudo verificar el OTP. Usa el código más reciente; en Turnkey Auth Proxy revisa Allowed Origins (URL exacta de esta página); o usa MetaMask.";
+  }
+
+  if (
+    lower.includes("origin") ||
+    lower.includes("cors") ||
+    lower.includes("forbidden")
+  ) {
+    return "El origen de esta página no está autorizado en Turnkey (Allowed Origins). Añade la URL exacta (p. ej. http://localhost:5173 o https://….github.io).";
+  }
+
+  if (lower.includes("sesión turnkey no disponible")) {
+    return "El OTP se verificó, pero la sesión aún no estaba lista. Espera un momento o recarga; no hace falta otro código si ya entraste.";
+  }
+
+  return raw || fallback;
+}
 
 function findEthereumAddress(wallets: Wallet[]): {
   address: Address;
@@ -121,78 +180,105 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const restoringRef = useRef(false);
   const restoreAttemptedRef = useRef(false);
+  const buildingRef = useRef(false);
+
+  const clientStateRef = useRef(clientState);
+  const httpClientRef = useRef(httpClient);
+  const turnkeySessionRef = useRef(turnkeySession);
+  const authStateRef = useRef(authState);
+  const userEmailRef = useRef(user?.userEmail);
+  clientStateRef.current = clientState;
+  httpClientRef.current = httpClient;
+  turnkeySessionRef.current = turnkeySession;
+  authStateRef.current = authState;
+  userEmailRef.current = user?.userEmail;
+
+  /** Espera a que el kit deje sesión + httpClient tras completeOtp (evita carrera). */
+  const waitForTurnkeySession = useCallback(async (timeoutMs = 15_000) => {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      if (httpClientRef.current && turnkeySessionRef.current) {
+        return {
+          httpClient: httpClientRef.current,
+          turnkeySession: turnkeySessionRef.current,
+        };
+      }
+      await sleep(100);
+    }
+    throw new Error("Sesión Turnkey no disponible. Reintenta el login.");
+  }, []);
 
   const buildTurnkeySession = useCallback(
     async (email?: string) => {
-      if (!httpClient || !turnkeySession) {
-        throw new Error("Sesión Turnkey no disponible. Reintenta el login.");
-      }
+      if (buildingRef.current) return;
+      buildingRef.current = true;
+      try {
+        const { httpClient: client, turnkeySession: tkSession } =
+          await waitForTurnkeySession();
 
-      let wallets = await refreshWallets();
-      let eth = findEthereumAddress(wallets);
+        let wallets = await refreshWallets();
+        let eth = findEthereumAddress(wallets);
 
-      if (!eth) {
-        await createWallet({
-          walletName: "Taller RENT",
-          accounts: ["ADDRESS_FORMAT_ETHEREUM"],
+        if (!eth) {
+          await createWallet({
+            walletName: "Taller RENT",
+            accounts: ["ADDRESS_FORMAT_ETHEREUM"],
+          });
+          wallets = await refreshWallets();
+          eth = findEthereumAddress(wallets);
+        }
+
+        if (!eth) {
+          throw new Error(
+            "No se encontró una cuenta Ethereum en Turnkey. Revisa el Auth Proxy.",
+          );
+        }
+
+        const turnkeyAccount = await createAccount({
+          client,
+          organizationId: eth.organizationId || tkSession.organizationId,
+          signWith: eth.address,
+          ethereumAddress: eth.address,
         });
-        wallets = await refreshWallets();
-        eth = findEthereumAddress(wallets);
+
+        const walletClient = createWalletClient({
+          account: turnkeyAccount,
+          chain,
+          transport: http(
+            (import.meta.env.VITE_SEPOLIA_RPC_URL as string | undefined) ||
+              undefined,
+          ),
+        });
+        const publicClient = createHttpPublicClient();
+
+        if (!pimlicoApiKey) {
+          throw new Error(
+            "Login email requiere VITE_PIMLICO_API_KEY (gas patrocinado). Sin eso la cuenta Turnkey no tiene ETH para pagar gas.",
+          );
+        }
+
+        const { client: smartAccountClient, address: kernelAddress } =
+          await createSponsoredKernelClient(turnkeyAccount);
+
+        setSession({
+          mode: "email",
+          ownerAddress: eth.address,
+          smartAccountAddress: kernelAddress,
+          email: email || userEmailRef.current,
+          walletClient,
+          smartAccountClient,
+          publicClient,
+        });
+        setPendingOtp(null);
+        setError(null);
+      } finally {
+        buildingRef.current = false;
       }
-
-      if (!eth) {
-        throw new Error(
-          "No se encontró una cuenta Ethereum en Turnkey. Revisa el Auth Proxy.",
-        );
-      }
-
-      const turnkeyAccount = await createAccount({
-        client: httpClient,
-        organizationId: eth.organizationId || turnkeySession.organizationId,
-        signWith: eth.address,
-        ethereumAddress: eth.address,
-      });
-
-      const walletClient = createWalletClient({
-        account: turnkeyAccount,
-        chain,
-        transport: http(
-          (import.meta.env.VITE_SEPOLIA_RPC_URL as string | undefined) ||
-            undefined,
-        ),
-      });
-      const publicClient = createHttpPublicClient();
-
-      if (!pimlicoApiKey) {
-        throw new Error(
-          "Login email requiere VITE_PIMLICO_API_KEY (gas patrocinado). Sin eso la cuenta Turnkey no tiene ETH para pagar gas.",
-        );
-      }
-
-      const { client: smartAccountClient, address: kernelAddress } =
-        await createSponsoredKernelClient(turnkeyAccount);
-
-      setSession({
-        mode: "email",
-        ownerAddress: eth.address,
-        smartAccountAddress: kernelAddress,
-        email: email || user?.userEmail,
-        walletClient,
-        smartAccountClient,
-        publicClient,
-      });
-      setPendingOtp(null);
     },
-    [
-      httpClient,
-      turnkeySession,
-      refreshWallets,
-      createWallet,
-      user?.userEmail,
-    ],
+    [waitForTurnkeySession, refreshWallets, createWallet],
   );
 
-  // Restaurar sesión Turnkey al recargar si ya hay Auth Proxy session.
+  // Restaurar sesión Turnkey al recargar (o si el OTP ya autenticó y falta Kernel).
   useEffect(() => {
     if (
       !turnkeyConfigured ||
@@ -201,6 +287,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session.mode !== "none" ||
       connecting ||
       restoringRef.current ||
+      buildingRef.current ||
       restoreAttemptedRef.current ||
       pendingOtp
     ) {
@@ -213,12 +300,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     void buildTurnkeySession(user?.userEmail)
       .catch((e) => {
-        setError(
-          e instanceof Error
-            ? e.message
-            : "No se pudo restaurar la sesión de email",
-        );
+        console.error("[auth] restore session", e);
+        setError(formatAuthError(e, "No se pudo restaurar la sesión de email"));
         setSession(empty);
+        // Permitir otro intento si la sesión aún no estaba lista.
+        restoreAttemptedRef.current = false;
       })
       .finally(() => {
         restoringRef.current = false;
@@ -261,10 +347,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             "Turnkey no está configurado. Define VITE_TURNKEY_ORGANIZATION_ID y VITE_TURNKEY_AUTH_PROXY_CONFIG_ID, o usa «Conectar billetera».",
           );
         }
-        if (clientState !== ClientState.Ready) {
-          throw new Error(
-            "Turnkey aún está inicializando. Espera un momento e inténtalo de nuevo.",
-          );
+
+        const origin =
+          typeof window !== "undefined" ? window.location.origin : "";
+
+        const deadline = Date.now() + 12_000;
+        while (clientStateRef.current !== ClientState.Ready) {
+          if (clientStateRef.current === ClientState.Error) {
+            throw new Error(
+              `Turnkey no pudo inicializar. Origen actual: ${origin}. En Auth Proxy → Allowed Origins añade exactamente esa URL (local: http://localhost:5173 · Pages: https://estrategia-e-innovacion-de-ti.github.io), guarda, recarga e intenta de nuevo.`,
+            );
+          }
+          if (Date.now() >= deadline) {
+            throw new Error(
+              `Turnkey no quedó listo a tiempo (estado: ${clientStateRef.current ?? "desconocido"}). Recarga la página. Si persiste, revisa Allowed Origins para ${origin}.`,
+            );
+          }
+          await sleep(200);
         }
 
         const trimmed = email.trim().toLowerCase();
@@ -277,19 +376,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           contact: trimmed,
         });
 
+        if (!result?.otpId || !result?.otpEncryptionTargetBundle) {
+          throw new Error(
+            "Turnkey no devolvió un OTP válido. Revisa Allowed Origins y Auth Proxy.",
+          );
+        }
+
         setPendingOtp({
           email: trimmed,
           otpId: result.otpId,
           otpEncryptionTargetBundle: result.otpEncryptionTargetBundle,
         });
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Error de autenticación");
+        console.error("[auth] initOtp", e);
+        setError(formatAuthError(e, "Error de autenticación"));
         setPendingOtp(null);
       } finally {
         setConnecting(false);
       }
     },
-    [clientState, initOtp],
+    [initOtp],
   );
 
   const verifyEmailOtp = useCallback(
@@ -298,33 +404,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setError("Primero solicita el código al correo.");
         return;
       }
+      if (!pendingOtp.otpEncryptionTargetBundle) {
+        setError(
+          "Sesión OTP incompleta. Pulsa «Reenviar código» e inténtalo de nuevo.",
+        );
+        return;
+      }
       setConnecting(true);
       setError(null);
+      const email = pendingOtp.email;
       try {
-        const code = otpCode.trim();
-        if (code.length < 6) {
-          throw new Error("Ingresa el código OTP completo.");
+        const code = normalizeOtpCode(otpCode);
+        if (code.length < 6 || code.length > 9) {
+          throw new Error(
+            "El código OTP debe tener entre 6 y 9 caracteres (según Turnkey).",
+          );
         }
 
         await completeOtp({
           otpId: pendingOtp.otpId,
           otpCode: code,
           otpEncryptionTargetBundle: pendingOtp.otpEncryptionTargetBundle,
-          contact: pendingOtp.email,
+          contact: email,
           otpType: OtpType.Email,
         });
 
+        // OTP ya consumido: limpiar UI y esperar a que el kit publique la sesión.
+        setPendingOtp(null);
         restoreAttemptedRef.current = true;
-        await buildTurnkeySession(pendingOtp.email);
+
+        await waitForTurnkeySession();
+        await buildTurnkeySession(email);
       } catch (e) {
-        setError(
-          e instanceof Error ? e.message : "No se pudo verificar el código",
-        );
+        console.error("[auth] completeOtp / build session", e);
+        // Si el OTP ya validó y solo falló el armado, dejar que el effect restaure.
+        if (
+          authStateRef.current === AuthState.Authenticated ||
+          turnkeySessionRef.current
+        ) {
+          restoreAttemptedRef.current = false;
+          setPendingOtp(null);
+          setError(
+            "Código verificado. Preparando tu cuenta… Si no conecta en unos segundos, recarga la página (no hace falta otro OTP).",
+          );
+        } else {
+          setError(formatAuthError(e, "No se pudo verificar el código"));
+        }
       } finally {
         setConnecting(false);
       }
     },
-    [pendingOtp, completeOtp, buildTurnkeySession],
+    [pendingOtp, completeOtp, waitForTurnkeySession, buildTurnkeySession],
   );
 
   const connectWallet = useCallback(async () => {
@@ -381,6 +511,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       connecting,
       error,
       pendingEmailOtp: pendingOtp?.email ?? null,
+      turnkeyReady: clientState === ClientState.Ready,
+      turnkeyClientState: clientState,
       connectEmail,
       verifyEmailOtp,
       cancelEmailOtp,
@@ -393,6 +525,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       connecting,
       error,
       pendingOtp,
+      clientState,
       connectEmail,
       verifyEmailOtp,
       cancelEmailOtp,

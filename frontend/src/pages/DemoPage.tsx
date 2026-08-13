@@ -160,6 +160,17 @@ export function DemoPage() {
   const balances = useBalances();
   const tx = useWorkshopTx();
 
+  /** 1 millón COP en unidades on-chain (2 decimals). */
+  const millionCopw = 1_000_000n * 100n;
+  const yieldAmountCopw = BigInt(yieldMillions) * millionCopw;
+  const maxYieldMillions =
+    balances.copw > 0n ? Number(balances.copw / millionCopw) : 0;
+  const canDeposit =
+    auth.isConnected &&
+    !tx.busy &&
+    yieldMillions >= 1 &&
+    balances.copw >= yieldAmountCopw;
+
   const transferAddressOk = isAddress(transferTo.trim());
   const canTransfer =
     auth.isConnected &&
@@ -278,8 +289,20 @@ export function DemoPage() {
                   onClick={() => void auth.connectEmail(email)}
                   className="btn-primary self-start"
                 >
-                  Continuar con email
+                  {auth.connecting ? "Conectando…" : "Continuar con email"}
                 </button>
+                {!auth.isConnected && auth.turnkeyClientState === "error" ? (
+                  <p className="text-sm text-naranja">
+                    Turnkey no inició. Allowed Origins debe incluir{" "}
+                    <code className="text-xs">{window.location.origin}</code>.
+                  </p>
+                ) : null}
+                {!auth.isConnected &&
+                auth.turnkeyClientState === "loading" ? (
+                  <p className="text-xs text-negro/50">
+                    Inicializando Turnkey…
+                  </p>
+                ) : null}
               </>
             ) : (
               <>
@@ -291,17 +314,30 @@ export function DemoPage() {
                   Código OTP
                   <input
                     type="text"
-                    inputMode="numeric"
+                    inputMode="text"
                     autoComplete="one-time-code"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    maxLength={9}
                     value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    placeholder="000000"
+                    onChange={(e) =>
+                      setOtpCode(e.target.value.replace(/\s+/g, ""))
+                    }
+                    placeholder="Código del correo"
                     className={`${fieldClass} font-mono tracking-widest`}
                   />
                 </label>
+                <p className="text-xs text-negro/50">
+                  Usa el código más reciente. Si falla, «Reenviar código» (el
+                  anterior queda inválido).
+                </p>
                 <button
                   type="button"
-                  disabled={auth.connecting || otpCode.trim().length < 6}
+                  disabled={
+                    auth.connecting ||
+                    otpCode.replace(/\s+/g, "").length < 6
+                  }
                   onClick={() => void auth.verifyEmailOtp(otpCode)}
                   className="btn-primary self-start"
                 >
@@ -333,14 +369,25 @@ export function DemoPage() {
                 </div>
               </>
             )}
-            <button
-              type="button"
-              disabled={auth.connecting || auth.isConnected}
-              onClick={() => void auth.connectWallet()}
-              className="btn-secondary self-start"
-            >
-              Conectar billetera
-            </button>
+            {auth.isConnected ? (
+              <button
+                type="button"
+                disabled={auth.connecting}
+                onClick={() => auth.disconnect()}
+                className="btn-secondary self-start"
+              >
+                Salir / desconectar
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={auth.connecting}
+                onClick={() => void auth.connectWallet()}
+                className="btn-secondary self-start"
+              >
+                Conectar billetera
+              </button>
+            )}
             {auth.error ? (
               <p className="text-sm leading-relaxed text-naranja">{auth.error}</p>
             ) : null}
@@ -456,16 +503,24 @@ export function DemoPage() {
                   El contrato reparte el aporte sobre el supply de RENT
                   (dividend-per-token).
                 </p>
-                <p>Tu COPW: {formatCopLabel(balances.copw)}</p>
+                <p>Tu saldo COPW: {formatCopLabel(balances.copw)}</p>
+                {auth.isConnected ? (
+                  <p>
+                    Con ese saldo puedes depositar hasta{" "}
+                    <strong>{maxYieldMillions}</strong> millón
+                    {maxYieldMillions === 1 ? "" : "es"} COP.
+                  </p>
+                ) : null}
               </WhatHappens>
             }
             footer={txFooter}
           >
             <label className={labelClass}>
-              Renta a depositar (millones COP)
+              Millones de COP (no el número completo del saldo)
               <input
                 type="number"
                 min={1}
+                max={maxYieldMillions > 0 ? maxYieldMillions : undefined}
                 value={yieldMillions}
                 onChange={(e) =>
                   setYieldMillions(Math.max(1, Number(e.target.value) || 1))
@@ -473,16 +528,43 @@ export function DemoPage() {
                 className={fieldNarrowClass}
               />
             </label>
+            <p className="text-sm leading-relaxed text-negro/70">
+              <strong>{yieldMillions}</strong> millón
+              {yieldMillions === 1 ? "" : "es"} ={" "}
+              <strong>{formatCopLabel(yieldAmountCopw)}</strong>
+              {auth.isConnected && balances.copw < yieldAmountCopw ? (
+                <span className="mt-1 block text-naranja">
+                  No te alcanza (tienes {formatCopLabel(balances.copw)}).
+                </span>
+              ) : null}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  disabled={!auth.isConnected || n > maxYieldMillions}
+                  onClick={() => setYieldMillions(n)}
+                  className={`btn-ghost text-sm ${
+                    yieldMillions === n ? "underline decoration-2" : ""
+                  }`}
+                >
+                  {n}M
+                </button>
+              ))}
+            </div>
             <button
               type="button"
-              disabled={!auth.isConnected || tx.busy}
+              disabled={!canDeposit}
               onClick={async () => {
-                await tx.depositYield(BigInt(yieldMillions) * 1_000_000n * 100n);
+                await tx.depositYield(yieldAmountCopw);
                 await balances.refresh();
               }}
               className="btn-primary self-start"
             >
-              {tx.busy ? "Procesando…" : "Depositar renta"}
+              {tx.busy
+                ? "Procesando…"
+                : `Depositar ${formatCopLabel(yieldAmountCopw)}`}
             </button>
           </SectionFrame>
         ) : null}
