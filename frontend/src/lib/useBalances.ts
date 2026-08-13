@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import type { Address } from "viem";
 import { useAuth } from "./auth";
 import {
   MAX_SUPPLY_RENT,
@@ -24,6 +25,10 @@ export type AccountingSnapshot = {
   epochId: bigint;
   /** COPW aún en el distributor (pool claimable global) */
   poolCopw: bigint;
+  /** Destino del COPW de PropertySale.buy */
+  treasury: Address | null;
+  /** COPW acumulado en treasury (compras primarias) */
+  treasuryCopw: bigint;
   loading: boolean;
 };
 
@@ -36,6 +41,8 @@ const empty: Omit<AccountingSnapshot, "loading"> = {
   totalDeposited: 0n,
   epochId: 0n,
   poolCopw: 0n,
+  treasury: null,
+  treasuryCopw: 0n,
 };
 
 /**
@@ -83,6 +90,11 @@ export function useBalances() {
           functionName: "balanceOf",
           args: [addresses.distributor],
         }) as Promise<bigint>,
+        publicClient.readContract({
+          address: addresses.sale,
+          abi: abis.sale,
+          functionName: "treasury",
+        }) as Promise<Address>,
       ]);
 
       const userReads =
@@ -109,8 +121,17 @@ export function useBalances() {
             ])
           : Promise.resolve([0n, 0n, 0n] as const);
 
-      const [[rentSupply, maxSupply, totalDeposited, epochId, poolCopw], [copw, rent, pending]] =
-        await Promise.all([protocolReads, userReads]);
+      const [
+        [rentSupply, maxSupply, totalDeposited, epochId, poolCopw, treasury],
+        [copw, rent, pending],
+      ] = await Promise.all([protocolReads, userReads]);
+
+      const treasuryCopw = (await publicClient.readContract({
+        address: addresses.copw,
+        abi: abis.copw,
+        functionName: "balanceOf",
+        args: [treasury],
+      })) as bigint;
 
       setState({
         copw,
@@ -121,6 +142,8 @@ export function useBalances() {
         totalDeposited,
         epochId,
         poolCopw,
+        treasury,
+        treasuryCopw,
         loading: false,
       });
     } catch {

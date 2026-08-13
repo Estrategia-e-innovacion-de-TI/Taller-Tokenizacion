@@ -138,8 +138,30 @@ export function AccountingPanel({ balances }: Props) {
               <Row
                 label="Pool COPW (distributor)"
                 value={formatCopLabel(balances.poolCopw)}
-                hint="Aún no claimado en el contrato"
+                hint="Renta depositada aún no claimada · no es el pago de compra"
               />
+              <Row
+                label="Treasury COPW (compras)"
+                value={formatCopLabel(balances.treasuryCopw)}
+                hint="Destino del COPW en PropertySale.buy · primario"
+              />
+              {balances.treasury ? (
+                <div className="border-b border-negro/10 py-2.5 last:border-b-0">
+                  <p className="text-sm text-negro/70">Address treasury</p>
+                  <a
+                    href={sepoliaAddressUrl(balances.treasury)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link-accent mt-1 inline-block break-all font-mono text-xs"
+                    title={balances.treasury}
+                  >
+                    {truncateAddress(balances.treasury, 6)}
+                  </a>
+                  <p className="mt-0.5 text-xs text-negro/40">
+                    Ver saldo COPW en Etherscan
+                  </p>
+                </div>
+              ) : null}
               <Row
                 label="Época / depósitos"
                 value={balances.epochId.toString()}

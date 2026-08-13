@@ -448,7 +448,8 @@ export function DemoPage() {
               <WhatHappens>
                 <p>
                   En email: un solo lote (approve + buy). En MetaMask: dos firmas.
-                  Luego mint de RENT.
+                  Luego mint de RENT. El COPW de la compra va al{" "}
+                  <strong>treasury</strong> (no al pool de renta).
                 </p>
                 <p>
                   Costo: {buyAmount} × {formatCopLabel(PRICE_PER_RENT_COPW)} ={" "}
