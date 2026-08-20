@@ -11,10 +11,17 @@ import {YieldDistributor} from "../src/YieldDistributor.sol";
 contract Deploy is Script {
     function run() external {
         address treasury = vm.envOr("TREASURY", msg.sender);
+        address existingCopw = vm.envOr("COPW_ADDRESS", address(0));
 
         vm.startBroadcast();
 
-        COPW copw = new COPW();
+        COPW copw;
+        if (existingCopw == address(0)) {
+            copw = new COPW();
+        } else {
+            copw = COPW(existingCopw);
+        }
+
         RENT rent = new RENT("RENT - Inmueble Demo", "Colombia");
         YieldDistributor distributor = new YieldDistributor(rent, copw);
         PropertySale sale = new PropertySale(rent, copw, distributor, treasury);
@@ -30,6 +37,9 @@ contract Deploy is Script {
         address saleAddr = address(sale);
 
         console2.log("COPW", copwAddr);
+        if (existingCopw != address(0)) {
+            console2.log("COPW reused (balances kept)");
+        }
         console2.log("RENT", rentAddr);
         console2.log("YieldDistributor", distAddr);
         console2.log("PropertySale", saleAddr);

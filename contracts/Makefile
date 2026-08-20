@@ -27,8 +27,10 @@ help: ## Muestra esta ayuda
 	@echo "  SEPOLIA_RPC_URL        RPC de Ethereum Sepolia"
 	@echo "  ETHERSCAN_API_KEY      API key Etherscan (requerida en make deploy)"
 	@echo "  TREASURY               (opcional) receptor del capital de venta"
+	@echo "  COPW_ADDRESS           (opcional) reusa COPW; redeploy RENT/sale/yield"
 	@echo ""
 	@echo "make deploy = broadcast + verify en Etherscan (pide PK interactiva)."
+	@echo "Taller nuevo: COPW_ADDRESS=<addr> make deploy  (mantiene saldos COPW)."
 	@echo "Tras deploy, las addresses quedan en README.md y deployments/."
 
 env: ## Crea .env desde .env.example si no existe
@@ -85,21 +87,21 @@ anvil: ## Nodo local Anvil
 
 deploy-dry: build check-env ## Simula deploy (sin broadcast)
 	@echo ">>> Simulación de deploy en $(RPC_URL)"
-	@if [ -n "$(TREASURY)" ]; then \
-		TREASURY="$(TREASURY)" forge script $(SCRIPT) --rpc-url "$(RPC_URL)"; \
-	else \
-		forge script $(SCRIPT) --rpc-url "$(RPC_URL)"; \
-	fi
+	@if [ -n "$(TREASURY)" ]; then export TREASURY="$(TREASURY)"; fi; \
+	 if [ -n "$(COPW_ADDRESS)" ]; then export COPW_ADDRESS="$(COPW_ADDRESS)"; fi; \
+	 forge script $(SCRIPT) --rpc-url "$(RPC_URL)"
 
 deploy: build check-env ## Deploy + verify en Etherscan; pide la PK de forma interactiva
 	@echo ">>> Deploy + verify en $(RPC_URL)"
 	@echo ">>> La private key NO se guarda; solo se usa en esta sesión."
 	@if [ -n "$(TREASURY)" ]; then echo ">>> Treasury: $(TREASURY)"; else echo ">>> Treasury: deployer (msg.sender)"; fi
+	@if [ -n "$(COPW_ADDRESS)" ]; then echo ">>> Reusa COPW: $(COPW_ADDRESS)"; else echo ">>> COPW: contrato nuevo"; fi
 	@bash -c 'set -euo pipefail; \
 		read -r -s -p "Private key: " DEPLOYER_PK; echo; \
 		if [ -z "$$DEPLOYER_PK" ]; then echo "Error: PK vacía"; exit 1; fi; \
 		case "$$DEPLOYER_PK" in 0x*|0X*) ;; *) DEPLOYER_PK="0x$$DEPLOYER_PK" ;; esac; \
 		if [ -n "$(TREASURY)" ]; then export TREASURY="$(TREASURY)"; fi; \
+		if [ -n "$(COPW_ADDRESS)" ]; then export COPW_ADDRESS="$(COPW_ADDRESS)"; fi; \
 		forge script $(SCRIPT) \
 			--rpc-url "$(RPC_URL)" \
 			--broadcast \

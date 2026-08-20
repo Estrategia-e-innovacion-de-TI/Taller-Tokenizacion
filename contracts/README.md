@@ -21,26 +21,34 @@ make deploy           # pide PK; broadcast + verify Etherscan; actualiza README
 make addresses        # re-sincroniza este README desde deployments/
 ```
 
+Taller nuevo (saldos RENT/yield en cero, COPW intacto):
+
+```bash
+COPW_ADDRESS=0x55815499F210C97187d242C63b6377D8F55b0553 make deploy
+```
+
+Luego copia las nuevas addresses a `frontend/.env` (`VITE_RENT_ADDRESS`, `VITE_SALE_ADDRESS`, `VITE_DISTRIBUTOR_ADDRESS`). `VITE_COPW_ADDRESS` no cambia.
+
 ## Direcciones desplegadas
 
 <!-- DEPLOYED_ADDRESSES_START -->
-**Red:** ethereum-sepolia (chainId `11155111`) · actualizado: 2026-08-06 21:20 UTC
+**Red:** ethereum-sepolia (chainId `11155111`) · actualizado: 2026-08-20 15:35 UTC
 
 | Contrato | Address |
 |----------|----------|
 | COPW | `0x55815499F210C97187d242C63b6377D8F55b0553` |
-| RENT | `0xd2AAB3ce00eCC5BA6cc954638c5cB7f27833E8Ef` |
-| YieldDistributor | `0x5916d8e775Bb899656A59cBB65F0B8b937A1b353` |
-| PropertySale | `0xcc3DB7e558F801a3048e305Fc6b762869FB93051` |
+| RENT | `0x51CB22C6A1A51D57c0f112C6100e7b7Ffe7F24ba` |
+| YieldDistributor | `0x121fD2529dC422183d389BCbaD99C4FF60A4B46f` |
+| PropertySale | `0x3900f8c6BaB4F1301A5feCaAdb5EB73D026aA526` |
 | Treasury | `0x9A8D3f1D52a8018D4f01f04DB8845C8a58Cc6d4a` |
 
 Para el frontend (`frontend/.env`):
 
 ```env
 VITE_COPW_ADDRESS=0x55815499F210C97187d242C63b6377D8F55b0553
-VITE_RENT_ADDRESS=0xd2AAB3ce00eCC5BA6cc954638c5cB7f27833E8Ef
-VITE_DISTRIBUTOR_ADDRESS=0x5916d8e775Bb899656A59cBB65F0B8b937A1b353
-VITE_SALE_ADDRESS=0xcc3DB7e558F801a3048e305Fc6b762869FB93051
+VITE_RENT_ADDRESS=0x51CB22C6A1A51D57c0f112C6100e7b7Ffe7F24ba
+VITE_DISTRIBUTOR_ADDRESS=0x121fD2529dC422183d389BCbaD99C4FF60A4B46f
+VITE_SALE_ADDRESS=0x3900f8c6BaB4F1301A5feCaAdb5EB73D026aA526
 ```
 <!-- DEPLOYED_ADDRESSES_END -->
 
