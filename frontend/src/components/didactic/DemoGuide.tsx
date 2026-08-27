@@ -107,7 +107,7 @@ export function DemoGuide({ onGoToStep }: Props) {
         />
 
         {/* Vida real */}
-        <div className="mt-8 border border-negro/10 bg-blanco p-5 md:p-6">
+        <div className="card mt-8">
           <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
             En la vida real
           </p>
@@ -140,7 +140,7 @@ export function DemoGuide({ onGoToStep }: Props) {
 
         {/* Demo vs real + pasos */}
         <div className="mt-8 grid gap-8 md:grid-cols-2 md:items-start md:gap-10">
-          <div className="min-w-0 border border-negro/10 bg-blanco p-5 md:p-6">
+          <div className="card min-w-0">
             <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
               Qué simplifica esta demo
             </p>
@@ -170,7 +170,7 @@ export function DemoGuide({ onGoToStep }: Props) {
             </div>
           </div>
 
-          <div className="min-w-0 border border-negro/10 bg-blanco p-5 md:p-6">
+          <div className="card min-w-0">
             <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
               Cómo se hace aquí (pasos)
             </p>

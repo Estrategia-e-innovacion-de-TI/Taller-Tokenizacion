@@ -16,7 +16,7 @@ TREASURY       ?=
 ETHERSCAN_KEY  ?= $(ETHERSCAN_API_KEY)
 
 .PHONY: help env check-env install build test test-v test-gas clean fmt snapshot \
-	anvil deploy deploy-dry sizes coverage addresses
+	anvil deploy deploy-dry verify-live sizes coverage addresses
 
 help: ## Muestra esta ayuda
 	@echo "Contratos (Foundry)"
@@ -90,6 +90,11 @@ deploy-dry: build check-env ## Simula deploy (sin broadcast)
 	@if [ -n "$(TREASURY)" ]; then export TREASURY="$(TREASURY)"; fi; \
 	 if [ -n "$(COPW_ADDRESS)" ]; then export COPW_ADDRESS="$(COPW_ADDRESS)"; fi; \
 	 forge script $(SCRIPT) --rpc-url "$(RPC_URL)"
+
+verify-live: check-env ## Fork Sepolia: prueba wiring + faucet/buy/deposit/claim (no escribe en cadena)
+	@echo ">>> Verificando contratos desplegados vía fork ($(RPC_URL))"
+	@echo ">>> Esto NO hace broadcast: solo simula sobre un snapshot de Sepolia."
+	forge test --match-path test/LiveFork.t.sol --fork-url "$(RPC_URL)" -vv
 
 deploy: build check-env ## Deploy + verify en Etherscan; pide la PK de forma interactiva
 	@echo ">>> Deploy + verify en $(RPC_URL)"

@@ -48,16 +48,12 @@ export function SectionFrame({
             aside ? "md:grid-cols-2 md:items-stretch" : ""
           }`}
         >
-          <div className="flex min-w-0 flex-col border border-negro/10 bg-blanco p-5 md:p-6">
-            <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
-              {actionLabel}
-            </p>
+          <div className="card flex min-w-0 flex-col">
+            <p className="eyebrow">{actionLabel}</p>
             <div className="mt-4 flex flex-col gap-4">{children}</div>
           </div>
           {aside ? (
-            <aside className="min-w-0 border border-negro/10 bg-blanco p-5 md:p-6">
-              {aside}
-            </aside>
+            <aside className="card min-w-0">{aside}</aside>
           ) : null}
         </div>
 

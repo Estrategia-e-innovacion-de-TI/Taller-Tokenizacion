@@ -11,12 +11,12 @@ export function HomePage() {
     <div>
       <div className="h-1.5 bg-amarillo" aria-hidden />
       <section className="container-app py-16 md:py-24">
-        <p className="eyebrow">Taller para banca · Colombia</p>
+        <p className="kicker">Taller para banca · Colombia</p>
         <h1 className="mt-4 max-w-3xl font-display text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl">
           Tokenización de activos
           <span className="block text-naranja">caso RENT</span>
         </h1>
-        <p className="mt-6 max-w-xl text-lg text-negro/65">
+        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
           Inmueble de 5.000 millones de pesos, participación desde 100.000 COP,
           rentas proporcionales. Con email el gas lo patrocina la demo; con
           MetaMask pagas ETH de Sepolia.
@@ -29,24 +29,24 @@ export function HomePage() {
             Ver conceptos
           </Link>
         </div>
-        <p className="mt-4 max-w-xl text-sm text-negro/50">
-          <strong className="text-negro/70">Demo</strong> = practicar on-chain ·{" "}
-          <strong className="text-negro/70">Conceptos</strong> = guía RWA +
+        <p className="mt-4 max-w-xl text-sm text-subtle">
+          <strong className="text-negro/80">Demo</strong> = practicar on-chain ·{" "}
+          <strong className="text-negro/80">Conceptos</strong> = guía RWA +
           profundizar
         </p>
 
-        <dl className="mt-14 grid gap-px overflow-hidden border border-negro/10 bg-negro/10 sm:grid-cols-3">
+        <dl className="mt-14 grid gap-3 sm:grid-cols-3">
           {stats.map((s) => (
-            <div key={s.label} className="bg-blanco p-5">
+            <div key={s.label} className="card !p-5">
               <dt className="eyebrow">{s.label}</dt>
-              <dd className="mt-1 font-display text-lg font-bold text-negro">
+              <dd className="mt-2 font-display text-lg font-bold text-negro">
                 {s.value}
               </dd>
             </div>
           ))}
         </dl>
 
-        <p className="mt-10 max-w-2xl border-l-4 border-amarillo pl-4 text-sm text-negro/55">
+        <p className="mt-10 max-w-2xl rounded-[var(--radius-2)] border-l-4 border-amarillo bg-amarillo-100/60 py-3 pl-4 pr-4 text-sm text-muted">
           Demo educativa en testnet. No constituye oferta pública ni producto
           autorizado por la Superintendencia Financiera de Colombia.
         </p>

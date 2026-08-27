@@ -72,6 +72,10 @@
   font-display: swap;
 }
 
+/*
+ * Tokens alineados a Design.json (tema claro Bancolombia / CIB).
+ * Paleta marca + grises + radio escala 1–4 / full.
+ */
 @theme {
   --color-amarillo: #ffd204;
   --color-verde: #00c587;
@@ -80,8 +84,32 @@
   --color-azul: #01cdeb;
   --color-negro: #2c2a29;
   --color-blanco: #f7f7f7;
+
+  /* Superficies y texto (Design.json temas.claro / paleta.grises) */
+  --color-tarjeta: #ffffff;
+  --color-borde: #e4e2e0;
+  --color-zebra: #f0eeec;
+  --color-muted: #6b6967;
+  --color-subtle: #8a8886;
+  --color-gris-claro: #d8d6d4;
+
+  /* Tonalidades 100 — fondos de chip / sección suave */
+  --color-amarillo-100: #fef4bb;
+  --color-verde-100: #b0ecda;
+  --color-naranja-100: #ffd7c4;
+  --color-rosado-100: #fce8f0;
+  --color-azul-100: #cceff8;
+
   --font-display: "CIBFontSans", sans-serif;
   --font-sans: "CIBFontSans", sans-serif;
+
+  --radius-1: 4px;
+  --radius-2: 8px;
+  --radius-3: 16px;
+  --radius-4: 24px;
+  --radius-full: 999px;
+
+  --shadow-card: 0 1px 2px rgb(44 42 41 / 0.04), 0 4px 16px rgb(44 42 41 / 0.06);
 }
 
 /*
@@ -90,6 +118,7 @@
  * - naranja: solo énfasis tipográfico y avisos (no botones).
  * - verde / azul / rosado: exclusivos para estado semántico (éxito, info, hitos)
  *   o para los puntos de wayfinding del recorrido paso a paso. Nunca como fondo de botón.
+ * - Cuerpo de texto siempre negro / muted / subtle — nunca en color de acento.
  */
 @layer components {
   .container-app {
@@ -97,25 +126,41 @@
   }
 
   .eyebrow {
-    @apply text-xs font-semibold tracking-[0.14em] text-negro/50 uppercase;
+    @apply text-xs font-semibold tracking-[0.14em] text-subtle uppercase;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 bg-amarillo px-5 py-2.5 text-sm font-bold tracking-tight text-negro transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2 rounded-[var(--radius-full)] bg-amarillo px-5 py-2.5 text-sm font-bold tracking-tight text-negro transition-[filter,transform] hover:brightness-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 border border-negro/25 bg-transparent px-5 py-2.5 text-sm font-bold tracking-tight text-negro transition-colors hover:bg-negro/5 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2 rounded-[var(--radius-full)] border border-borde bg-tarjeta px-5 py-2.5 text-sm font-bold tracking-tight text-negro transition-colors hover:bg-zebra disabled:cursor-not-allowed disabled:opacity-40;
   }
   .btn-ghost {
-    @apply inline-flex items-center gap-1.5 text-sm font-semibold text-negro/55 underline transition-colors hover:text-negro;
+    @apply inline-flex items-center gap-1.5 text-sm font-semibold text-muted underline decoration-borde underline-offset-2 transition-colors hover:text-negro hover:decoration-azul;
   }
 
   .card {
-    @apply border border-negro/10 bg-blanco p-5 md:p-6;
+    @apply rounded-[var(--radius-3)] border border-borde bg-tarjeta p-5 shadow-[var(--shadow-card)] md:p-6;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-[var(--radius-1)] px-2 py-0.5 text-xs font-semibold text-negro;
+  }
+
+  .field {
+    @apply w-full rounded-[var(--radius-2)] border border-borde bg-tarjeta px-3 py-2.5 text-negro outline-none transition-colors placeholder:text-subtle focus:border-azul;
+  }
+
+  .field-sm {
+    @apply w-full max-w-[10rem] rounded-[var(--radius-2)] border border-borde bg-tarjeta px-3 py-2.5 text-negro outline-none transition-colors placeholder:text-subtle focus:border-azul;
   }
 
   .link-accent {
     @apply font-semibold text-negro underline decoration-azul decoration-2 underline-offset-2 hover:decoration-naranja;
+  }
+
+  .kicker {
+    @apply text-xs font-semibold tracking-[0.14em] text-azul uppercase;
   }
 }
 
@@ -155,9 +200,14 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   font-weight: 400;
-  background: var(--color-blanco);
   color: var(--color-negro);
   -webkit-font-smoothing: antialiased;
+  background-color: var(--color-blanco);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 100% -10%, rgb(254 244 187 / 0.55), transparent 55%),
+    radial-gradient(ellipse 60% 40% at -5% 30%, rgb(204 239 248 / 0.35), transparent 50%),
+    linear-gradient(180deg, var(--color-blanco) 0%, var(--color-zebra) 100%);
+  background-attachment: fixed;
 }
 
 .font-display {

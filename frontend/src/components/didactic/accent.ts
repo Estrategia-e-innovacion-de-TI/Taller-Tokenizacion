@@ -1,4 +1,6 @@
-/** Paleta de acentos compartida por los componentes didácticos (chips, diagramas). */
+/** Paleta de acentos compartida por los componentes didácticos (chips, diagramas).
+ *  Fondos suaves = tonalidades 100 de Design.json.
+ */
 export type Accent = "amarillo" | "verde" | "naranja" | "rosado" | "azul";
 
 export const ACCENT_BORDER: Record<Accent, string> = {
@@ -10,11 +12,11 @@ export const ACCENT_BORDER: Record<Accent, string> = {
 };
 
 export const ACCENT_CHIP: Record<Accent, string> = {
-  amarillo: "border-amarillo bg-amarillo/30",
-  verde: "border-verde bg-verde/25",
-  naranja: "border-naranja bg-naranja/25",
-  rosado: "border-rosado bg-rosado/40",
-  azul: "border-azul bg-azul/25",
+  amarillo: "border-amarillo/40 bg-amarillo-100",
+  verde: "border-verde/40 bg-verde-100",
+  naranja: "border-naranja/40 bg-naranja-100",
+  rosado: "border-rosado/50 bg-rosado-100",
+  azul: "border-azul/40 bg-azul-100",
 };
 
 /** Barra corta de wayfinding sobre el título de cada paso. */

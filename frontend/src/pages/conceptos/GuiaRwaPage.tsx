@@ -59,14 +59,14 @@ export function GuiaRwaPage() {
             <a
               key={s.id}
               href={`#${s.id}`}
-              className="border border-negro/15 px-2.5 py-1 text-xs font-semibold text-negro/70 hover:border-negro/40"
+              className="rounded-[var(--radius-full)] border border-borde bg-tarjeta px-2.5 py-1 text-xs font-semibold text-muted hover:border-gris-claro hover:text-negro"
             >
               {s.label}
             </a>
           ))}
           <Link
             to="/conceptos/enlaces"
-            className="border border-azul bg-azul px-2.5 py-1 text-xs font-semibold"
+            className="rounded-[var(--radius-full)] border border-azul bg-azul-100 px-2.5 py-1 text-xs font-semibold text-negro"
           >
             Todos los enlaces →
           </Link>

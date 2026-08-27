@@ -32,10 +32,8 @@ type StepId = (typeof steps)[number]["id"];
 function WhatHappens({ children }: { children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
-        Qué está pasando
-      </p>
-      <div className="mt-3 space-y-2.5 text-sm leading-relaxed text-negro/70">
+      <p className="eyebrow">Qué está pasando</p>
+      <div className="mt-3 space-y-2.5 text-sm leading-relaxed text-muted">
         {children}
       </div>
     </div>
@@ -64,12 +62,10 @@ function PublicAddress({
   };
 
   return (
-    <div className="border border-negro/10 bg-blanco p-5 md:p-6">
-      <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
-        {label}
-      </p>
+    <div className="card">
+      <p className="eyebrow">{label}</p>
       {hint ? (
-        <p className="mt-1.5 text-xs leading-relaxed text-negro/55">{hint}</p>
+        <p className="mt-1.5 text-xs leading-relaxed text-muted">{hint}</p>
       ) : null}
       <p className="mt-3 break-all font-mono text-sm leading-relaxed text-negro">
         {address}
@@ -107,7 +103,7 @@ function StepPager({
   const next = idx >= 0 && idx < steps.length - 1 ? steps[idx + 1] : null;
 
   return (
-    <div className="border-t border-negro/10">
+    <div className="border-t border-borde">
       <div className="container-app flex flex-wrap items-center justify-between gap-3 py-4">
         {prev ? (
           <button
@@ -139,10 +135,8 @@ function StepPager({
   );
 }
 
-const fieldClass =
-  "w-full border border-negro/15 bg-white px-3 py-2.5 outline-none focus:border-azul";
-const fieldNarrowClass =
-  "w-full max-w-[10rem] border border-negro/15 bg-white px-3 py-2.5 outline-none focus:border-azul";
+const fieldClass = "field";
+const fieldNarrowClass = "field-sm";
 const labelClass = "flex flex-col gap-4 text-sm leading-snug text-negro/80";
 
 /**
@@ -198,16 +192,16 @@ export function DemoPage() {
   return (
     <div className="pb-8">
       <div className="container-app py-6 md:py-8">
-        <p className="eyebrow text-naranja">Flujo práctico</p>
-        <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+        <p className="kicker">Flujo práctico</p>
+        <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight md:text-4xl">
           Tokeniza RENT en vivo
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-negro/65 md:text-base">
+        <p className="mt-2 max-w-2xl text-sm text-muted md:text-base">
           Un paso a la vez. Usa la barra o Anterior / Siguiente. La teoría está
           en Conceptos.
         </p>
         {!contractsConfigured ? (
-          <p className="mt-3 border border-naranja/40 bg-naranja/10 px-3 py-2 text-sm">
+          <p className="mt-3 rounded-[var(--radius-2)] border border-naranja/40 bg-naranja-100 px-3 py-2 text-sm text-negro">
             Faltan addresses de contratos en <code>.env</code>. Puedes recorrer la
             UI; las txs on-chain requieren el deploy Foundry.
           </p>

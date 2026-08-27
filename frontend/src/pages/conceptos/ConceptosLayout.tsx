@@ -21,20 +21,21 @@ export function ConceptosLayout() {
 
   return (
     <div className="container-app py-10">
-      <h1 className="font-display text-3xl font-extrabold">Conceptos</h1>
-      <p className="mt-2 text-negro/60">
+      <p className="kicker">Lectura · sin transacciones</p>
+      <h1 className="mt-2 font-display text-3xl font-extrabold">Conceptos</h1>
+      <p className="mt-2 max-w-2xl text-muted">
         Lectura interactiva: clic en términos para profundizar. Sin
         transacciones — la práctica está en Demo.
       </p>
-      <div className="mt-6 flex flex-wrap gap-2 border-b-2 border-negro/10 pb-6">
+      <div className="mt-6 flex flex-wrap gap-2 border-b border-borde pb-6">
         {items.map((i) => (
           <Link
             key={i.to}
             to={i.to}
-            className={`px-3 py-1.5 text-sm font-semibold ${
+            className={`rounded-[var(--radius-full)] px-3.5 py-1.5 text-sm font-semibold transition ${
               loc.pathname === i.to
-                ? "bg-amarillo text-negro"
-                : "border border-negro/10 text-negro/60"
+                ? "bg-amarillo text-negro shadow-sm"
+                : "border border-borde bg-tarjeta text-muted hover:bg-zebra hover:text-negro"
             }`}
           >
             {i.label}

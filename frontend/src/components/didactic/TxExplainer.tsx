@@ -36,7 +36,7 @@ export function TxExplainer({ state }: { state: TxExplainerState }) {
   const pending = pendingStatuses.has(state.status);
 
   return (
-    <div className="border border-negro/10 bg-blanco p-5 md:p-6">
+    <div className="card">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <span className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
           Tx

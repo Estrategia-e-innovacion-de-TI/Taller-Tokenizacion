@@ -40,17 +40,15 @@ export function ConceptExpand({
       {open ? (
         <div
           id={panelId}
-          className={`mt-2 border border-negro/10 border-l-4 bg-blanco p-4 ${ACCENT_BORDER[accent]}`}
+          className={`card mt-2 !rounded-[var(--radius-2)] border-l-4 !p-4 ${ACCENT_BORDER[accent]}`}
         >
           <p className="text-sm leading-relaxed text-negro/75">{summary}</p>
           {children ? (
             <div className="mt-3 space-y-2 text-sm text-negro/70">{children}</div>
           ) : null}
           {links.length > 0 ? (
-            <ul className="mt-4 space-y-1.5 border-t border-negro/10 pt-3">
-              <li className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
-                Enlaces de interés
-              </li>
+            <ul className="mt-4 space-y-1.5 border-t border-borde pt-3">
+              <li className="eyebrow">Enlaces de interés</li>
               {links.map((l) => (
                 <li key={l.id} className="text-sm">
                   <a

@@ -191,7 +191,7 @@ export function MermaidDiagram({ chart, caption, className = "", notes }: Props)
 
   return (
     <figure
-      className={`my-4 mx-auto w-fit max-w-full border border-negro/10 bg-blanco p-3 ${className}`}
+      className={`card my-4 mx-auto w-fit max-w-full !p-3 ${className}`}
     >
       {loading && !error ? (
         <p className="text-center text-xs text-negro/40">Cargando…</p>
@@ -210,7 +210,7 @@ export function MermaidDiagram({ chart, caption, className = "", notes }: Props)
       ) : null}
       {activeNote ? (
         <div
-          className={`mt-2 border border-negro/10 border-l-4 bg-blanco p-3 text-left ${
+          className={`card mt-2 !rounded-[var(--radius-2)] border-l-4 !p-3 text-left ${
             ACCENT_BORDER[activeNote.accent ?? "azul"]
           }`}
         >

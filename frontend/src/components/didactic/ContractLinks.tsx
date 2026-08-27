@@ -40,7 +40,7 @@ export function ContractLinks({
 }) {
   if (!contractsConfigured) {
     return (
-      <div className="border border-negro/10 bg-blanco p-5 md:p-6">
+      <div className="card">
         <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
           {title}
         </p>
@@ -52,7 +52,7 @@ export function ContractLinks({
   }
 
   return (
-    <div className="border border-negro/10 bg-blanco p-5 md:p-6">
+    <div className="card">
       <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
         {title}
       </p>

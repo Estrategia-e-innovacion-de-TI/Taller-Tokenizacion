@@ -1,0 +1,3479 @@
+{
+  "$schema": "PPT_Forge design system v1.1",
+  "version": "1.1.1",
+  "descripcion": "Archivo base del sistema de diseño para generación de presentaciones. Define paleta, tipografía, reglas y plantillas de slides reutilizables.",
+  "changelog": [
+    {
+      "version": "1.1.1",
+      "cambios": [
+        "Tonalidades Bancolombia a–f (100 / 200 / 500) en paleta.tonalidades.",
+        "Escala de border-radius (tokens 0–7 y full) con valores en px e in para pptxgenjs."
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "cambios": [
+        "Retícula en pulgadas (márgenes, columnas 1–4, bandas verticales) y variantes para fondos rail y split.",
+        "Temas claro/oscuro/acento como tokens: un layout se renderiza en varios modos sin duplicar geometría.",
+        "Geometría y assets_fondo declarados en cada tipo de slide; ningún fondo queda sin tipo asociado.",
+        "Componentes nuevos: banner_enfasis y flecha_conector (antes referenciados sin definir), tabla, tabla_comparativa, chip, cita, kpi, caja_codigo, nota_al_pie, barra_progreso, hito_timeline y seis variantes de tarjeta.",
+        "Catálogo de slides de 11 a 27 arquetipos; separadores con cinco composiciones y rotación de color sugerida.",
+        "Fuentes CIBFont Numerals y monoespaciada declaradas, más interlineado y topes de texto.",
+        "Accesibilidad con contrastes medidos, límites de densidad y sección de gráficos."
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "cambios": [
+        "Paleta de marca, grises y paleta independiente para tablas y gráficos.",
+        "Tipografía CIBFont Sans con escala de tamaños.",
+        "Componentes base: kicker, título, número de página, tarjeta, círculo badge y línea de acento.",
+        "11 tipos de slide, 10 fondos, 36 iconos y 6 separadores."
+      ]
+    }
+  ],
+  "lienzo": {
+    "layout": "LAYOUT_WIDE",
+    "ancho_in": 13.33,
+    "alto_in": 7.5,
+    "unidad": "pulgadas"
+  },
+  "reticula": {
+    "descripcion": "Sistema de posicionamiento en pulgadas. Usar estas coordenadas en vez de improvisar valores por presentación: garantiza que dos slides distintos alineen entre sí.",
+    "margen": {
+      "x": 0.7,
+      "y_top": 0.5,
+      "y_bottom": 0.55,
+      "ancho_util_in": 11.93
+    },
+    "gutter": 0.35,
+    "columnas": {
+      "descripcion": "x = borde izquierdo de cada columna; w = ancho de una columna. Todas cierran en x=12.63 (margen derecho 0.7).",
+      "1": {
+        "w": 11.93,
+        "x": [0.7]
+      },
+      "2": {
+        "w": 5.79,
+        "x": [0.7, 6.84]
+      },
+      "3": {
+        "w": 3.74,
+        "x": [0.7, 4.79, 8.88]
+      },
+      "4": {
+        "w": 2.72,
+        "x": [0.7, 3.77, 6.84, 9.91]
+      },
+      "span_libre": {
+        "paso_in": 0.994,
+        "nota": "Para anchos irregulares: w = n * 0.994 - gutter. Ej. 5 de 12 columnas → 4.62 in."
+      }
+    },
+    "bandas_y": {
+      "descripcion": "Alturas canónicas del eje vertical. Respetarlas hace que kicker y título no bailen entre slides.",
+      "kicker": 0.5,
+      "titulo": 0.85,
+      "subtitulo": 1.85,
+      "contenido": 2.15,
+      "contenido_alto_max": 4.15,
+      "banner": 5.9,
+      "banner_alto": 0.9,
+      "pie": 6.95
+    },
+    "filas_tarjetas": {
+      "descripcion": "Y de inicio según cuántas filas de tarjetas lleve el slide.",
+      "1": { "y": [2.15], "h": 4.15 },
+      "2": { "y": [2.0, 4.4], "h": 2.2 },
+      "3": { "y": [2.0, 3.6, 5.2], "h": 1.45 }
+    },
+    "variantes_por_fondo": {
+      "descripcion": "Fondos con estructura propia sobreescriben la retícula estándar. Ver assets.imagenes para el detalle.",
+      "rail": {
+        "aplica_a": ["bg_content_rail_light", "bg_content_rail_dark"],
+        "corte_x_in": 3.24,
+        "zona_rail": { "x": 0.5, "w": 2.5 },
+        "zona_campo": { "x": 3.6, "w": 9.03 },
+        "columnas_campo": {
+          "2": { "w": 4.34, "x": [3.6, 8.29] },
+          "3": { "w": 2.78, "x": [3.6, 6.73, 9.85] }
+        }
+      },
+      "split": {
+        "aplica_a": ["bg_content_split_half"],
+        "corte_x_in": 6.55,
+        "panel_izquierdo": { "x": 0.7, "w": 5.2 },
+        "panel_derecho": { "x": 7.1, "w": 5.53 }
+      }
+    }
+  },
+  "bordes": {
+    "descripcion": "Escala de border-radius con tokens reutilizables. No inventar valores fuera de esta escala. pptxgenjs usa rectRadius en pulgadas (in = px / 96).",
+    "unidad_origen": "px",
+    "unidad_pptx": "in",
+    "dpi": 96,
+    "uso_en_codigo": "design.bordes.escala['3'].in para cards; design.bordes.escala.full.in_formula para pills/avatares (min(w,h)/2).",
+    "escala": {
+      "0": {
+        "token": "border-radius-0",
+        "px": 0,
+        "in": 0,
+        "uso": "Headers fijos, full width"
+      },
+      "1": {
+        "token": "border-radius-1",
+        "px": 4,
+        "in": 0.0417,
+        "uso": "Chips, tags, pequeños badges"
+      },
+      "2": {
+        "token": "border-radius-2",
+        "px": 8,
+        "in": 0.0833,
+        "uso": "Inputs, overlays"
+      },
+      "3": {
+        "token": "border-radius-3",
+        "px": 16,
+        "in": 0.1667,
+        "uso": "Cards, contenedores base"
+      },
+      "4": {
+        "token": "border-radius-4",
+        "px": 24,
+        "in": 0.25,
+        "uso": "Secciones destacadas"
+      },
+      "5": {
+        "token": "border-radius-5",
+        "px": 32,
+        "in": 0.3333,
+        "uso": "Contenedores amplios"
+      },
+      "6": {
+        "token": "border-radius-6",
+        "px": 48,
+        "in": 0.5,
+        "uso": "Avatares grandes, hero visuals"
+      },
+      "7": {
+        "token": "border-radius-7",
+        "px": 64,
+        "in": 0.6667,
+        "uso": "Headers gráficos, promos"
+      },
+      "full": {
+        "token": "border-radius-full",
+        "px": 999,
+        "in": null,
+        "in_formula": "Math.min(w, h) / 2",
+        "uso": "Avatares circulares, íconos, botones, pills"
+      }
+    },
+    "recomendaciones": [
+      "Usa radios coherentes con el padding interno.",
+      "Aplica lógica de simetría en componentes repetitivos.",
+      "Usa border-radius-0 cuando el elemento esté al borde de la pantalla (o del lienzo).",
+      "Verifica el comportamiento del radio en distintos breakpoints (o tamaños de slide: wide vs poster).",
+      "Respeta la escala; no inventes nuevos valores."
+    ]
+  },
+  "temas": {
+    "descripcion": "Tokens de color por modo. Un mismo layout se puede renderizar en claro, oscuro o acento sin cambiar geometría: se resuelven los tokens y se pasan al helper. Multiplica el catálogo de slides sin diseñar layouts nuevos.",
+    "uso": "Elegir tema por slide según el fondo. El tema define el color de TEXTO y TARJETA; el fondo lo define assets.imagenes.",
+    "claro": {
+      "fondos_compatibles": [
+        "fondo_blanco_bancolombia",
+        "bg_content_solid_light",
+        "bg_content_rail_light"
+      ],
+      "texto_primario": "#2C2A29",
+      "texto_secundario": "#6B6967",
+      "texto_terciario": "#8A8886",
+      "tarjeta_fill": "#FFFFFF",
+      "tarjeta_borde": "#E4E2E0",
+      "tarjeta_sombra": true,
+      "banda_zebra": "#F0EEEC",
+      "numero_pagina": "#B9B7B5",
+      "acentos_permitidos": ["azul", "verde", "naranja", "amarillo", "rosado"]
+    },
+    "oscuro": {
+      "fondos_compatibles": [
+        "bg_content_solid_dark",
+        "fondo_contenido_negro_franjas_esquina",
+        "fono_contenido_negro_franja_izquierdo",
+        "bg_content_rail_dark"
+      ],
+      "texto_primario": "#FFFFFF",
+      "texto_secundario": "#C9C7C5",
+      "texto_terciario": "#8A8886",
+      "tarjeta_fill": "#3A3836",
+      "tarjeta_borde": "none",
+      "tarjeta_sombra": false,
+      "banda_zebra": "#343231",
+      "numero_pagina": "#8A8886",
+      "acentos_permitidos": ["azul", "verde", "naranja", "amarillo", "rosado"]
+    },
+    "acento": {
+      "descripcion": "Slide a color completo (separadores o llamados de atención). El fondo es un color de marca; el texto se resuelve según separadores.opciones.",
+      "fondos_compatibles": ["color sólido de paleta.marca"],
+      "texto_primario": "según separadores.opciones[].color_texto",
+      "texto_secundario": "mismo color con opacidad visual reducida (usar gris solo si el fondo es claro)",
+      "tarjeta_fill": "#FFFFFF",
+      "tarjeta_borde": "none",
+      "tarjeta_sombra": false,
+      "acentos_permitidos": ["negro", "blanco"],
+      "nota": "No mezclar dos colores de marca en el mismo slide de acento."
+    }
+  },
+  "paleta": {
+    "marca": {
+      "amarillo": {
+        "hex": "#FFD204",
+        "uso": "Acento 1 — destacados, íconos"
+      },
+      "verde": {
+        "hex": "#00C587",
+        "uso": "Acento 2 — confirmación, positivo"
+      },
+      "naranja": {
+        "hex": "#FF803A",
+        "uso": "Acento 3 — alerta, énfasis cálido"
+      },
+      "rosado": {
+        "hex": "#FFB8D2",
+        "uso": "Acento 4 — suave, complementario"
+      },
+      "azul": {
+        "hex": "#01CDEB",
+        "uso": "Acento 5 — tecnología, links, kickers"
+      },
+      "negro": {
+        "hex": "#2C2A29",
+        "uso": "Texto principal, fondos oscuros"
+      },
+      "blanco": {
+        "hex": "#F7F7F7",
+        "uso": "Fondos claros, texto sobre oscuro"
+      }
+    },
+    "grises": {
+      "gris_texto_suave": {
+        "hex": "#6B6967",
+        "uso": "Texto secundario / descripciones"
+      },
+      "gris_medio": {
+        "hex": "#8A8886",
+        "uso": "Texto terciario, numeración"
+      },
+      "gris_claro": {
+        "hex": "#D8D6D4",
+        "uso": "Separadores, fondos neutros"
+      },
+      "gris_tarjeta": {
+        "hex": "#3A3836",
+        "uso": "Tarjetas sobre fondo negro"
+      },
+      "borde_tarjeta": {
+        "hex": "#E4E2E0",
+        "uso": "Bordes de tarjetas en fondo blanco"
+      }
+    },
+    "tonalidades": {
+      "descripcion": "Escala Bancolombia 100 / 200 / 500 por familia (a–f). Complementa paleta.marca: 500 es el acento de familia; 100 y 200 sirven para fondos de sección, chips y barras. El cuerpo de texto sigue siendo negro o blanco.",
+      "uso_en_codigo": "design.paleta.tonalidades.a['500'].hex → strip() para pptxgenjs. No usar 100/200 como color de cuerpo de texto.",
+      "familias": {
+        "a": {
+          "nombre": "amarillo",
+          "100": { "hex": "#FEF4BB", "rgb": "254, 244, 187", "token": "bancolombia.tonalities.a-100" },
+          "200": { "hex": "#FDE773", "rgb": "253, 231, 115", "token": "bancolombia.tonalities.a-200" },
+          "500": { "hex": "#FDDA24", "rgb": "253, 218, 36", "token": "bancolombia.tonalities.a-500" }
+        },
+        "b": {
+          "nombre": "verde",
+          "100": { "hex": "#B0ECDA", "rgb": "176, 236, 218", "token": "bancolombia.tonalities.b-100" },
+          "200": { "hex": "#66DBB8", "rgb": "102, 219, 184", "token": "bancolombia.tonalities.b-200" },
+          "500": { "hex": "#00C389", "rgb": "0, 195, 137", "token": "bancolombia.tonalities.b-500" }
+        },
+        "c": {
+          "nombre": "morado",
+          "100": { "hex": "#DDCFF0", "rgb": "221, 207, 240", "token": "bancolombia.tonalities.c-100" },
+          "200": { "hex": "#C5ADE5", "rgb": "197, 173, 229", "token": "bancolombia.tonalities.c-200" },
+          "500": { "hex": "#9063CD", "rgb": "144, 99, 205", "token": "bancolombia.tonalities.c-500" }
+        },
+        "d": {
+          "nombre": "naranja",
+          "100": { "hex": "#FFD7C4", "rgb": "255, 215, 196", "token": "bancolombia.tonalities.d-100" },
+          "200": { "hex": "#FFB28D", "rgb": "255, 178, 141", "token": "bancolombia.tonalities.d-200" },
+          "500": { "hex": "#FF7F41", "rgb": "255, 127, 65", "token": "bancolombia.tonalities.d-500" }
+        },
+        "e": {
+          "nombre": "rosado",
+          "100": { "hex": "#FCE8F0", "rgb": "252, 232, 240", "token": "bancolombia.tonalities.e-100" },
+          "200": { "hex": "#F9D3E1", "rgb": "249, 211, 225", "token": "bancolombia.tonalities.e-200" },
+          "500": { "hex": "#F5B6CD", "rgb": "245, 182, 205", "token": "bancolombia.tonalities.e-500" }
+        },
+        "f": {
+          "nombre": "azul",
+          "100": { "hex": "#CCEFF8", "rgb": "204, 239, 248", "token": "bancolombia.tonalities.f-100" },
+          "200": { "hex": "#9BE0F1", "rgb": "155, 224, 241", "token": "bancolombia.tonalities.f-200" },
+          "500": { "hex": "#59CBE8", "rgb": "89, 203, 232", "token": "bancolombia.tonalities.f-500" }
+        }
+      }
+    },
+    "tablas_y_graficos": {
+      "descripcion": "Paleta exclusiva para visualización de datos. NO usar colores marca en tablas.",
+      "reglas": [
+        "No usar fondos en las tablas.",
+        "Estilo gráfico minimalista — destacar solo los datos más relevantes.",
+        "NO usar los colores marca para tablas ni gráficos."
+      ],
+      "filas": [
+        {
+          "intensidad": "oscura",
+          "colores": [
+            {
+              "nombre": "rojo_oscuro",
+              "hex": "#C04C36",
+              "rgb": "192, 76, 54",
+              "cmyk": "19, 79, 80, 8"
+            },
+            {
+              "nombre": "dorado_oscuro",
+              "hex": "#867035",
+              "rgb": "134, 112, 53",
+              "cmyk": "39, 42, 82, 31"
+            },
+            {
+              "nombre": "verde_oscuro",
+              "hex": "#008755",
+              "rgb": "0, 135, 85",
+              "cmyk": "85, 22, 80, 6"
+            },
+            {
+              "nombre": "azul_oscuro",
+              "hex": "#352FCC",
+              "rgb": "53, 47, 204",
+              "cmyk": "90, 78, 0, 0"
+            },
+            {
+              "nombre": "morado_oscuro",
+              "hex": "#5828A1",
+              "rgb": "88, 40, 161",
+              "cmyk": "83, 89, 0, 0"
+            }
+          ]
+        },
+        {
+          "intensidad": "media",
+          "colores": [
+            {
+              "nombre": "rojo",
+              "hex": "#FF3341",
+              "rgb": "255, 51, 65",
+              "cmyk": "0, 88, 65, 0"
+            },
+            {
+              "nombre": "naranja",
+              "hex": "#FF6900",
+              "rgb": "255, 105, 0",
+              "cmyk": "0, 69, 94, 0"
+            },
+            {
+              "nombre": "verde",
+              "hex": "#00BF6F",
+              "rgb": "0, 191, 111",
+              "cmyk": "73, 0, 72, 0"
+            },
+            {
+              "nombre": "azul",
+              "hex": "#4666FF",
+              "rgb": "70, 102, 255",
+              "cmyk": "81, 63, 0, 0"
+            },
+            {
+              "nombre": "morado",
+              "hex": "#7A1FFF",
+              "rgb": "122, 31, 255",
+              "cmyk": "80, 78, 0, 0"
+            }
+          ]
+        },
+        {
+          "intensidad": "clara",
+          "colores": [
+            {
+              "nombre": "salmon",
+              "hex": "#FC6D51",
+              "rgb": "252, 109, 81",
+              "cmyk": "0, 69, 64, 0"
+            },
+            {
+              "nombre": "naranja_claro",
+              "hex": "#F6863C",
+              "rgb": "246, 134, 60",
+              "cmyk": "0, 57, 80, 0"
+            },
+            {
+              "nombre": "verde_claro",
+              "hex": "#47D7AC",
+              "rgb": "71, 215, 172",
+              "cmyk": "62, 0, 46, 0"
+            },
+            {
+              "nombre": "azul_claro",
+              "hex": "#4AA1FF",
+              "rgb": "74, 161, 255",
+              "cmyk": "65, 31, 0, 0"
+            },
+            {
+              "nombre": "morado_claro",
+              "hex": "#8F53FF",
+              "rgb": "143, 83, 255",
+              "cmyk": "71, 71, 0, 0"
+            }
+          ]
+        },
+        {
+          "intensidad": "texto_dato",
+          "colores": [
+            {
+              "nombre": "negro_dato",
+              "hex": "#2C2A29",
+              "rgb": "44, 42, 41",
+              "cmyk": "0, 0, 0, 100"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "tipografia": {
+    "regla_general": "Los cuerpos de texto siempre van en blanco o en negro. NUNCA en colores.",
+    "fuentes": [
+      {
+        "id": "FONT_HEAD",
+        "nombre_pptx": "CIBFont Sans",
+        "nombre_sistema_fallback": "Cambria",
+        "uso": "Títulos, subtítulos, encabezados de tarjetas",
+        "ruta_base": "CIBFont Sans/CIBFont Sans/",
+        "formatos_disponibles": [
+          "otf",
+          "ttf",
+          "woff",
+          "woff2",
+          "eot"
+        ],
+        "pesos": [
+          {
+            "peso": "Thin",
+            "archivo_otf": "CIBFontSans-Thin.otf",
+            "archivo_ttf": "ttf/CIBFontSans-Thin.ttf",
+            "italic": {
+              "archivo_otf": "CIBFontSans-ThinItalic.otf",
+              "archivo_ttf": "ttf/CIBFontSans-ThinItalic.ttf"
+            }
+          },
+          {
+            "peso": "Light",
+            "archivo_otf": "CIBFontSans-Light.otf",
+            "archivo_ttf": "ttf/CIBFontSans-Light.ttf",
+            "italic": {
+              "archivo_otf": "CIBFontSans-LightItalic.otf",
+              "archivo_ttf": "ttf/CIBFontSans-LightItalic.ttf"
+            }
+          },
+          {
+            "peso": "Book",
+            "archivo_otf": "CIBFontSans-Book.otf",
+            "archivo_ttf": "ttf/CIBFontSans-Book.ttf",
+            "italic": {
+              "archivo_otf": "CIBFontSans-BookItalic.otf",
+              "archivo_ttf": "ttf/CIBFontSans-BookItalic.ttf"
+            }
+          },
+          {
+            "peso": "Regular",
+            "archivo_otf": "CIBFontSans-Regular.otf",
+            "archivo_ttf": "ttf/CIBFontSans-Regular.ttf",
+            "italic": {
+              "archivo_otf": "CIBFontSans-Italic.otf",
+              "archivo_ttf": "ttf/CIBFontSans-Italic.ttf"
+            }
+          },
+          {
+            "peso": "Bold",
+            "archivo_otf": "CIBFontSans-Bold.otf",
+            "archivo_ttf": "ttf/CIBFontSans-Bold.ttf",
+            "italic": {
+              "archivo_otf": "CIBFontSans-BoldItalic.otf",
+              "archivo_ttf": "ttf/CIBFontSans-BoldItalic.ttf"
+            }
+          }
+        ],
+        "uso_por_peso": {
+          "Thin": "Textos muy grandes decorativos o displays secundarios",
+          "Light": "Subtítulos amplios, texto introductorio",
+          "Book": "Cuerpo de texto corrido, lectura cómoda",
+          "Regular": "Texto general, descripciones, kickers",
+          "Bold": "Títulos principales, encabezados de tarjeta, énfasis"
+        }
+      },
+      {
+        "id": "FONT_NUM",
+        "nombre_pptx": "CIBFont Numerals",
+        "nombre_sistema_fallback": "CIBFont Sans",
+        "uso": "Cifras cortas y destacadas: KPI, número de sección, número de página grande, valores en estadísticas",
+        "disponible_en_repo": false,
+        "nota_disponibilidad": "Los archivos de fuente NO están en el repo. Si no está instalada en el sistema, PowerPoint cae a CIBFont Sans Bold y el slide sigue siendo válido. Instalar en el OS antes de generar si se requiere el trazo de numerales.",
+        "restriccion": "Nunca como cuerpo de texto corrido, títulos ni etiquetas. Solo cifras.",
+        "componentes_que_la_usan": ["kpi", "separadores.variantes.numerado", "tipos_de_slide.estadisticas"]
+      },
+      {
+        "id": "FONT_MONO",
+        "nombre_pptx": "Consolas",
+        "nombre_sistema_fallback": "Courier New",
+        "uso": "Bloques de código, payloads, comandos, direcciones de contrato y hashes",
+        "disponible_en_repo": false,
+        "nota_disponibilidad": "Consolas viene con Office en Windows; Courier New existe en todos los sistemas. No es fuente de marca: su uso está limitado a contenido técnico literal.",
+        "restriccion": "Prohibida en títulos, kickers y cuerpo narrativo. Su presencia debe significar 'esto es código o un valor literal'.",
+        "componentes_que_la_usan": ["caja_codigo"],
+        "nota_hashes": "Direcciones y hashes largos: truncar al centro (0x55cF…5f86) salvo que el punto del slide sea el valor completo."
+      }
+    ],
+    "tamaños": {
+      "display": {
+        "size_pt": 80,
+        "fuente": "CIBFont Sans",
+        "peso": "Bold",
+        "uso": "Títulos de portada grandes"
+      },
+      "titulo_1": {
+        "size_pt": 34,
+        "fuente": "CIBFont Sans",
+        "peso": "Bold",
+        "uso": "Títulos principales de slide"
+      },
+      "titulo_2": {
+        "size_pt": 22,
+        "fuente": "CIBFont Sans",
+        "peso": "Bold",
+        "uso": "Subtítulos, nombres de tarjeta"
+      },
+      "titulo_3": {
+        "size_pt": 18,
+        "fuente": "CIBFont Sans",
+        "peso": "Bold",
+        "uso": "Encabezados secundarios"
+      },
+      "cuerpo": {
+        "size_pt": 16,
+        "fuente": "CIBFont Sans",
+        "peso": "Book",
+        "uso": "Párrafos de contenido"
+      },
+      "cuerpo_sm": {
+        "size_pt": 14,
+        "fuente": "CIBFont Sans",
+        "peso": "Book",
+        "uso": "Texto en tarjetas, notas al pie"
+      },
+      "cuerpo_xs": {
+        "size_pt": 13,
+        "fuente": "CIBFont Sans",
+        "peso": "Regular",
+        "uso": "Descripciones de ítems"
+      },
+      "kicker": {
+        "size_pt": 12,
+        "fuente": "CIBFont Sans",
+        "peso": "Bold",
+        "uso": "Etiqueta de sección en mayúsculas, char_spacing: 2"
+      },
+      "numero_slide": {
+        "size_pt": 10,
+        "fuente": "CIBFont Sans",
+        "peso": "Regular",
+        "uso": "Numeración de página, esquina inferior derecha"
+      }
+    },
+    "interlineado": {
+      "descripcion": "lineSpacingMultiple en pptxgenjs. Los títulos van más apretados que el cuerpo; el texto grande necesita menos aire proporcional.",
+      "display": 0.95,
+      "titulo_1": 1.0,
+      "titulo_2": 1.05,
+      "titulo_3": 1.1,
+      "cuerpo": 1.3,
+      "cuerpo_sm": 1.25,
+      "cuerpo_xs": 1.2,
+      "kicker": 1.0,
+      "codigo": 1.2
+    },
+    "limites_texto": {
+      "descripcion": "Topes para que el texto no desborde su caja. Si un contenido no cabe, se recorta el mensaje — no se baja la fuente por debajo del mínimo.",
+      "size_minimo_pt": 12,
+      "size_minimo_nota_al_pie_pt": 10,
+      "titulo": { "max_caracteres": 70, "max_lineas": 2 },
+      "subtitulo": { "max_caracteres": 110, "max_lineas": 2 },
+      "kicker": { "max_caracteres": 45, "max_lineas": 1 },
+      "cuerpo": { "max_caracteres": 320, "max_lineas": 6 },
+      "texto_en_tarjeta": { "max_caracteres": 180, "max_lineas": 5 },
+      "item_de_lista": { "max_caracteres": 120, "max_lineas": 2 },
+      "nota": "Al superar el tope: dividir en dos slides, no reducir la fuente ni estrechar el interlineado."
+    },
+    "reglas_de_texto": [
+      "Un solo nivel de viñetas. Si hace falta un segundo nivel, el contenido pide otro slide o una tarjeta.",
+      "El título enuncia la conclusión, no el tema ('COPW es la llave de entrada', no 'Sobre COPW').",
+      "Énfasis solo con negrilla o color de acento en fragmentos cortos; nunca subrayado ni mayúsculas sostenidas fuera del kicker.",
+      "Sin cursiva en bloques largos: reservada a subtítulos, citas y notas al pie."
+    ]
+  },
+  "componentes": {
+    "kicker": {
+      "descripcion": "Etiqueta de sección en la parte superior del slide",
+      "x_default": 0.6,
+      "y_default": 0.5,
+      "w_default": 8,
+      "h": 0.4,
+      "fuente": "CIBFont Sans",
+      "peso": "Bold",
+      "size": 12,
+      "mayusculas": true,
+      "char_spacing": 2,
+      "color_default": "azul"
+    },
+    "titulo": {
+      "descripcion": "Título principal de cada slide de contenido",
+      "x_default": 0.6,
+      "y_default": 0.85,
+      "w_default": 11.8,
+      "h_default": 0.9,
+      "fuente": "CIBFont Sans",
+      "peso": "Bold",
+      "size_default": 32,
+      "align": "left",
+      "color_default": "negro"
+    },
+    "numero_pagina": {
+      "descripcion": "Folio en esquina inferior derecha",
+      "x": 12.43,
+      "y": 6.95,
+      "w": 0.6,
+      "h": 0.35,
+      "fuente": "CIBFont Sans",
+      "peso": "Regular",
+      "size": 10,
+      "align": "right",
+      "color_fondo_claro": "#B9B7B5",
+      "color_fondo_oscuro": "#8A8886"
+    },
+    "tarjeta": {
+      "descripcion": "Contenedor redondeado genérico (roundRect)",
+      "radio_default": 0.12,
+      "fill_default": "blanco",
+      "borde_default": {
+        "color": "#E4E2E0",
+        "width": 1
+      },
+      "sombra_suave": {
+        "type": "outer",
+        "color": "2C2A29",
+        "opacity": 0.18,
+        "blur": 8,
+        "offset": 3,
+        "angle": 90
+      },
+      "padding_interno": 0.3,
+      "variantes": {
+        "descripcion": "Cinco acabados sobre la misma geometría. Elegir uno por slide y no mezclar variantes en la misma fila de tarjetas.",
+        "plana": {
+          "fill": "#FFFFFF",
+          "borde": "#E4E2E0",
+          "sombra": true,
+          "uso": "Default en tema claro"
+        },
+        "borde_acento": {
+          "fill": "#FFFFFF",
+          "sombra": true,
+          "barra_izquierda": { "w": 0.12, "color": "acento de la categoría" },
+          "uso": "Cuando cada tarjeta representa una categoría distinta"
+        },
+        "header_color": {
+          "fill": "#FFFFFF",
+          "sombra": true,
+          "barra_superior": { "h": 0.12, "color": "acento" },
+          "uso": "Métricas o tarjetas con jerarquía de título fuerte"
+        },
+        "outline": {
+          "fill": "none",
+          "borde": "#E4E2E0",
+          "sombra": false,
+          "uso": "Grids densos donde la sombra genera ruido visual"
+        },
+        "oscura": {
+          "fill": "#3A3836",
+          "borde": "none",
+          "sombra": false,
+          "uso": "Obligatoria en tema oscuro (las tarjetas oscuras NO llevan sombra)"
+        },
+        "destacada": {
+          "fill": "acento de marca",
+          "borde": "none",
+          "sombra": false,
+          "color_texto": "#2C2A29",
+          "uso": "Una sola por slide, para señalar la opción recomendada o el dato clave"
+        }
+      }
+    },
+    "banner_enfasis": {
+      "descripcion": "Banda horizontal inferior con una conclusión, pregunta o dato de cierre. Usada por contenido_3_columnas, comparacion, diagrama_fases y estados.",
+      "x": 0.7,
+      "y": 5.9,
+      "w": 11.93,
+      "h": 0.9,
+      "radio": 0.12,
+      "fill_opciones": ["negro", "amarillo", "azul", "verde"],
+      "fuente": "CIBFont Sans",
+      "peso": "Bold",
+      "size": 16,
+      "align": "center",
+      "valign": "middle",
+      "color_texto": "blanco sobre fill negro; negro sobre fill de acento",
+      "max_caracteres": 120,
+      "nota": "Un banner por slide. No usarlo como cuerpo de texto: es un remate de una sola frase."
+    },
+    "flecha_conector": {
+      "descripcion": "Conector entre cajas de fase o estado. Usado por diagrama_fases y estados.",
+      "forma_pptx": "line con lineTail: 'triangle' (o shape 'rightArrow' para flechas de bloque)",
+      "grosor": 2,
+      "color_default": "#8A8886",
+      "longitud_min": 0.35,
+      "etiqueta": {
+        "fuente": "CIBFont Sans",
+        "peso": "Regular",
+        "size": 12,
+        "color": "#6B6967",
+        "posicion": "centrada sobre la flecha, offset y: -0.3",
+        "mayusculas": false
+      },
+      "nota": "La flecha vive en el gutter entre cajas (0.35 in). No cruzarla por encima de una caja."
+    },
+    "chip": {
+      "descripcion": "Etiqueta corta de estado, versión o categoría",
+      "forma": "roundRect",
+      "radio": 0.14,
+      "h": 0.32,
+      "padding_x": 0.18,
+      "fuente": "CIBFont Sans",
+      "peso": "Bold",
+      "size": 11,
+      "mayusculas": true,
+      "char_spacing": 1,
+      "variantes": {
+        "solido": { "fill": "acento", "color_texto": "negro" },
+        "outline": { "fill": "none", "borde": "acento", "color_texto": "acento (solo aquí se permite texto en color)" },
+        "neutro": { "fill": "#E4E2E0", "color_texto": "#2C2A29" }
+      },
+      "max_caracteres": 18
+    },
+    "cita": {
+      "descripcion": "Bloque de cita o testimonio destacado",
+      "comilla_decorativa": {
+        "caracter": "“",
+        "size": 72,
+        "color": "acento",
+        "offset": { "x": -0.1, "y": -0.35 }
+      },
+      "texto": {
+        "fuente": "CIBFont Sans",
+        "peso": "Light",
+        "size": 26,
+        "italic": true,
+        "interlineado": 1.25,
+        "max_caracteres": 220
+      },
+      "autor": {
+        "fuente": "CIBFont Sans",
+        "peso": "Bold",
+        "size": 14,
+        "prefijo": "— ",
+        "color": "#6B6967"
+      }
+    },
+    "kpi": {
+      "descripcion": "Cifra grande con etiqueta. Bloque de métrica destacada.",
+      "valor": {
+        "fuente": "CIBFont Numerals",
+        "fallback": "CIBFont Sans",
+        "peso": "Bold",
+        "size": 44,
+        "color": "negro (claro) | blanco (oscuro)",
+        "max_caracteres": 6
+      },
+      "unidad": {
+        "size": 20,
+        "peso": "Regular",
+        "color": "acento",
+        "posicion": "sufijo en la misma línea"
+      },
+      "etiqueta": {
+        "size": 13,
+        "peso": "Regular",
+        "color": "#6B6967",
+        "mayusculas": false,
+        "max_caracteres": 60
+      },
+      "nota": "Sin decimales largos ni cifras crudas: redondear y declarar la unidad."
+    },
+    "caja_codigo": {
+      "descripcion": "Bloque de código o payload para sesiones técnicas (Solidity, JSON, CLI).",
+      "forma": "roundRect",
+      "radio": 0.08,
+      "fill_tema_claro": "#F0EEEC",
+      "fill_tema_oscuro": "#1F1E1D",
+      "borde": { "color": "#E4E2E0", "width": 1 },
+      "sombra": false,
+      "padding_interno": 0.25,
+      "texto": {
+        "fuente": "FONT_MONO",
+        "size": 12,
+        "size_min": 10,
+        "color_claro": "#2C2A29",
+        "color_oscuro": "#F0EEEC",
+        "interlineado": 1.2,
+        "max_lineas": 14,
+        "max_columnas": 78
+      },
+      "resaltado": {
+        "metodo": "un solo fragmento en negrilla + color de acento",
+        "nota": "No intentar syntax highlighting completo; resaltar solo la línea que se está explicando."
+      },
+      "nota": "Si el snippet no cabe en 14 líneas, partirlo en dos slides o mostrar solo la firma relevante."
+    },
+    "nota_al_pie": {
+      "descripcion": "Fuente, disclaimer o aclaración legal al pie del slide",
+      "x": 0.7,
+      "y": 6.85,
+      "w": 11.93,
+      "h": 0.4,
+      "fuente": "CIBFont Sans",
+      "peso": "Regular",
+      "size": 10,
+      "italic": true,
+      "color_claro": "#8A8886",
+      "color_oscuro": "#8A8886",
+      "max_caracteres": 200,
+      "convencion_fuente": "Fuente: <origen>, <año>.",
+      "nota": "Obligatoria cuando el slide muestra cifras de terceros o afirmaciones regulatorias."
+    },
+    "barra_progreso": {
+      "descripcion": "Indicador lineal de avance o de posición dentro del deck",
+      "pista": { "h": 0.1, "radio": 0.05, "color": "#E4E2E0" },
+      "relleno": { "color": "acento", "radio": 0.05 },
+      "etiqueta": { "size": 11, "color": "#6B6967", "formato": "3 / 6" },
+      "uso": "Separadores de capítulo o slides de roadmap. No usar como gráfico de datos."
+    },
+    "hito_timeline": {
+      "descripcion": "Marca sobre un eje horizontal de tiempo",
+      "eje": { "h": 0.06, "color": "#D8D6D4", "y": 3.9 },
+      "punto": { "forma": "ellipse", "d": 0.28, "color": "acento", "borde_blanco": 0.06 },
+      "etiqueta_fecha": { "size": 12, "peso": "Bold", "color": "#2C2A29", "offset_y": -0.55 },
+      "etiqueta_texto": { "size": 12, "peso": "Regular", "color": "#6B6967", "offset_y": 0.35, "max_caracteres": 70 },
+      "max_hitos": 6,
+      "nota": "Alternar etiquetas arriba/abajo si hay más de 4 hitos para evitar colisión."
+    },
+    "tabla": {
+      "descripcion": "Tabla de datos. La paleta de tablas es independiente de la paleta marca.",
+      "metodo_pptx": "slide.addTable(rows, opts)",
+      "encabezado": {
+        "fill": "#2C2A29",
+        "color_texto": "#FFFFFF",
+        "peso": "Bold",
+        "size": 12,
+        "alto_fila": 0.45
+      },
+      "cuerpo": {
+        "size": 12,
+        "peso": "Book",
+        "color_texto": "#2C2A29",
+        "alto_fila": 0.4,
+        "zebra": { "activo": true, "color_par": "#FFFFFF", "color_impar": "#F0EEEC" }
+      },
+      "borde": { "color": "#E4E2E0", "width": 1 },
+      "alineacion": {
+        "texto": "left",
+        "numeros": "right",
+        "nota": "Cifras alineadas a la derecha siempre; usar CIBFont Numerals si son cortas y destacadas."
+      },
+      "limites": { "max_columnas": 5, "max_filas_visibles": 8 },
+      "nota": "Sin imágenes de fondo detrás de una tabla. Si excede los límites, resumir o pasar a gráfico."
+    },
+    "tabla_comparativa": {
+      "descripcion": "Comparación por ejes entre dos alternativas (A vs B). Formato de 3 columnas: eje + opción A + opción B.",
+      "columnas": {
+        "eje": { "x": 0.7, "w": 2.7, "peso": "Bold", "size": 14 },
+        "opcion_a": { "x": 3.6, "w": 4.5, "size": 12, "color_encabezado": "naranja" },
+        "opcion_b": { "x": 8.4, "w": 4.23, "size": 12, "color_encabezado": "verde" }
+      },
+      "encabezado": { "y": 1.95, "size": 13, "peso": "Bold", "linea_inferior": { "color": "#E4E2E0", "width": 1.5, "y": 2.4 } },
+      "filas": { "y_inicio": 2.55, "alto": 0.85, "max_filas": 5, "zebra": { "color_impar": "#F0EEEC" } },
+      "nota": "Los colores de encabezado señalan a qué alternativa pertenece cada columna; el cuerpo va siempre en gris/negro."
+    },
+    "circulo_badge": {
+      "descripcion": "Círculo con número o ícono centrado, para listas o pasos",
+      "forma": "ellipse",
+      "fuente_label": "CIBFont Sans",
+      "peso_label": "Bold",
+      "size_label_default": 20,
+      "color_texto_default": "negro"
+    },
+    "linea_acento": {
+      "descripcion": "Línea horizontal decorativa bajo un bloque de texto",
+      "width": 3,
+      "color_default": "naranja"
+    }
+  },
+  "tipos_de_slide": {
+    "descripcion": "Plantillas de slides disponibles en el sistema. Cada tipo define su estructura visual.",
+    "catalogo": [
+      {
+        "id": "portada",
+        "nombre": "Portada / Title",
+        "fondo": "negro | blanco",
+        "assets_fondo": [
+          "fondo_portada_bancolombia_negro",
+          "fondo_portada_bancolombia_blanco"
+        ],
+        "elementos": [
+          "Esferas o franjas decorativas (zona derecha / inferior — según asset)",
+          "kicker — categoría o evento",
+          "display — título principal grande",
+          "subtítulo con texto mixto",
+          "línea de acento horizontal",
+          "metadata — tipo de sesión o duración"
+        ],
+        "nota": "Elegir asset negro (texto claro) o blanco (texto oscuro). En ambos, colocar título en la zona izquierda libre; no solapar logo ni franjas de la derecha.",
+        "sin_numero_pagina": true,
+        "tema": "oscuro | claro (según asset)",
+        "geometria": {
+          "kicker": { "x": 0.7, "y": 0.9, "w": 8 },
+          "titulo": { "x": 0.65, "y": 2.35, "w": 7.5, "size": 52 },
+          "subtitulo": { "x": 0.7, "y": 3.7, "w": 7, "size": 20 },
+          "linea_acento": { "x": 0.7, "y": 5.0, "w": 3.0 },
+          "metadata": { "x": 0.7, "y": 5.25, "w": 8, "size": 14 },
+          "zona_prohibida": "x > 8.5 (franjas y logo del asset)"
+        }
+      },
+      {
+        "id": "agenda",
+        "nombre": "Agenda / Índice",
+        "fondo": "blanco",
+        "assets_fondo": ["fondo_blanco_bancolombia", "bg_content_rail_light"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "lista vertical de ítems con circleBadge de color + título + descripción"
+        ],
+        "geometria": {
+          "referencia": "reticula.bandas_y",
+          "filas": { "y_inicio": 2.15, "paso": 1.2, "max_items": 4 },
+          "badge": { "x": 0.7, "d": 0.62 },
+          "texto": { "x": 1.6, "w": 10, "size_titulo": 20, "size_desc": 14 }
+        },
+        "nota_variante": "Sobre bg_content_rail_light: dejar el número de sección en el rail (x 0.5–3.0) y la lista en el campo (x 3.6+)."
+      },
+      {
+        "id": "contenido_texto",
+        "nombre": "Contenido — Texto + tarjeta de nota",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light", "fondo_blanco_bancolombia"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "párrafo con texto enriquecido (negrilla + color)",
+          "tarjeta de nota con borde izquierdo de acento"
+        ],
+        "geometria": {
+          "parrafo": { "x": 0.7, "y": 2.15, "w": 7.5, "size": 16 },
+          "tarjeta_nota": { "x": 8.6, "y": 2.15, "w": 4.03, "h": 3.2, "variante_tarjeta": "borde_acento" }
+        }
+      },
+      {
+        "id": "contenido_grid_2x2",
+        "nombre": "Contenido — Grid 2×2 de tarjetas",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light", "fondo_blanco_bancolombia"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "4 tarjetas con sombra suave, borde izquierdo de color, título y descripción"
+        ],
+        "geometria": {
+          "referencia": "reticula.columnas.2 + reticula.filas_tarjetas.2",
+          "tarjetas": { "w": 5.79, "h": 2.2, "x": [0.7, 6.84], "y": [2.0, 4.4] },
+          "variante_tarjeta": "borde_acento",
+          "padding_interno": 0.3
+        }
+      },
+      {
+        "id": "contenido_3_columnas",
+        "nombre": "Contenido — 3 columnas de tarjetas",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light", "fondo_blanco_bancolombia"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "3 tarjetas verticales con badge numerado, título y descripción",
+          "banner inferior de énfasis (fondo negro o acento)"
+        ],
+        "geometria": {
+          "referencia": "reticula.columnas.3",
+          "tarjetas": { "w": 3.74, "h": 3.4, "x": [0.7, 4.79, 8.88], "y": 2.15 },
+          "banner": { "x": 0.7, "y": 5.9, "w": 11.93, "h": 0.9, "componente": "banner_enfasis" }
+        }
+      },
+      {
+        "id": "comparacion",
+        "nombre": "Comparación de dos conceptos",
+        "fondo": "negro | split",
+        "assets_fondo": ["bg_content_split_half", "bg_content_solid_dark"],
+        "tema": "oscuro (o mixto sobre split)",
+        "elementos": [
+          "kicker con color de acento",
+          "título en blanco",
+          "2 tarjetas oscuras lado a lado con ícono circular",
+          "banner inferior de pregunta o reflexión con fondo de acento"
+        ],
+        "geometria": {
+          "sobre_solid_dark": {
+            "referencia": "reticula.columnas.2",
+            "tarjetas": { "w": 5.79, "h": 3.4, "x": [0.7, 6.84], "y": 2.15 }
+          },
+          "sobre_split_half": {
+            "referencia": "reticula.variantes_por_fondo.split",
+            "panel_izquierdo": { "x": 0.7, "w": 5.2, "tema": "claro" },
+            "panel_derecho": { "x": 7.1, "w": 5.53, "tema": "oscuro" },
+            "nota": "Sin tarjetas: el propio fondo separa los conceptos. Un título por panel."
+          }
+        }
+      },
+      {
+        "id": "diagrama_fases",
+        "nombre": "Diagrama de fases / flujo lineal",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light", "fondo_blanco_bancolombia"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "texto introductorio con palabras clave en color",
+          "2 o más cajas de fase conectadas por flecha",
+          "etiqueta de tiempo / transición",
+          "banner inferior de conclusión"
+        ],
+        "geometria": {
+          "intro": { "x": 0.7, "y": 1.9, "w": 11.93, "size": 16 },
+          "cajas": {
+            "y": 3.0,
+            "h": 2.0,
+            "2_fases": { "w": 5.2, "x": [0.7, 7.43] },
+            "3_fases": { "w": 3.3, "x": [0.7, 5.02, 9.33] },
+            "4_fases": { "w": 2.4, "x": [0.7, 3.78, 6.86, 9.94] }
+          },
+          "conectores": { "componente": "flecha_conector", "y_centro": 4.0 },
+          "banner": { "x": 0.7, "y": 5.9, "w": 11.93, "h": 0.9 }
+        }
+      },
+      {
+        "id": "estados",
+        "nombre": "Ciclo de vida / estados",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_rail_light", "bg_content_solid_light"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "cajas de estado con fill de color, conectadas por flechas con etiqueta de acción",
+          "banner inferior oscuro con nota clave"
+        ],
+        "geometria": {
+          "cajas_estado": { "w": 2.4, "h": 1.1, "y": 3.2, "x": [0.7, 3.78, 6.86, 9.94] },
+          "conectores": { "componente": "flecha_conector", "etiqueta_size": 12 },
+          "banner": { "x": 0.7, "y": 5.9, "w": 11.93, "h": 0.9, "fill": "negro" }
+        },
+        "nota_variante": "Sobre bg_content_rail_light: número o etiqueta del ciclo en el rail; las cajas dentro del campo (x 3.6+)."
+      },
+      {
+        "id": "estadisticas",
+        "nombre": "Estadísticas / métricas destacadas",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light", "bg_content_solid_dark"],
+        "tema": "claro | oscuro",
+        "elementos": [
+          "kicker",
+          "título",
+          "3 tarjetas con barra superior de color, valor grande (display) y descripción"
+        ],
+        "geometria": {
+          "referencia": "reticula.columnas.3",
+          "tarjetas": { "w": 3.74, "h": 2.8, "x": [0.7, 4.79, 8.88], "y": 2.4 },
+          "componente_valor": "kpi",
+          "barra_superior": { "h": 0.12, "color": "acento por tarjeta" }
+        },
+        "nota": "Máximo 4 métricas por slide. Cifras con CIBFont Numerals; nunca decimales largos."
+      },
+      {
+        "id": "lista_oscura",
+        "nombre": "Lista de puntos sobre fondo oscuro",
+        "fondo": "negro",
+        "assets_fondo": ["bg_content_solid_dark", "bg_content_rail_dark", "fondo_contenido_negro_franjas_esquina"],
+        "tema": "oscuro",
+        "elementos": [
+          "kicker con color de acento",
+          "título en blanco",
+          "lista vertical con iconCircle de color + texto en blanco",
+          "tarjeta complementaria lateral (cita, reflexión o dato)"
+        ],
+        "geometria": {
+          "lista": { "x": 0.7, "y_inicio": 2.15, "paso": 0.95, "w": 7.3, "max_items": 5 },
+          "tarjeta_lateral": { "x": 8.6, "y": 2.15, "w": 4.03, "h": 3.6, "variante_tarjeta": "oscura" }
+        }
+      },
+      {
+        "id": "cierre",
+        "nombre": "Slide de cierre",
+        "fondo": "negro",
+        "asset_fondo": "fondo_contenido_negro_franjas_esquina",
+        "nota_fondo": "Usar fondo_contenido_negro_franjas_esquina (esquinas decorativas, área central libre). NO usar fondo_portada_bancolombia_negro porque el logo interfiere con el contenido.",
+        "tema": "oscuro",
+        "elementos": [
+          "fondo_contenido_negro_franjas_esquina como imagen de fondo",
+          "etiqueta EN UNA FRASE o CONCLUSIÓN",
+          "texto clave de cierre (2 líneas, blanco + acento)",
+          "línea de acento horizontal",
+          "Preguntas + Gracias"
+        ],
+        "sin_numero_pagina": true,
+        "geometria": {
+          "etiqueta": { "x": 1.0, "y": 1.3, "w": 10, "size": 13 },
+          "frase": { "x": 1.0, "y": 1.85, "w": 11, "size": 26 },
+          "linea_acento": { "x": 1.0, "y": 4.0, "w": 2.6 },
+          "cierre": { "x": 1.0, "y": 4.3, "w": 6, "size": 24 },
+          "pie_legal": { "x": 1.0, "y": 5.3, "w": 11, "size": 12, "componente": "nota_al_pie" }
+        }
+      },
+      {
+        "id": "split_texto_imagen",
+        "nombre": "Split — texto en un panel, imagen o bullets en el otro",
+        "fondo": "split",
+        "assets_fondo": ["bg_content_split_half"],
+        "tema": "mixto (claro izquierda, oscuro derecha)",
+        "elementos": [
+          "kicker y título dentro del panel claro",
+          "párrafo corto o lista en el panel claro",
+          "imagen, captura o bullets en blanco en el panel oscuro"
+        ],
+        "geometria": {
+          "referencia": "reticula.variantes_por_fondo.split",
+          "panel_izquierdo": { "x": 0.7, "w": 5.2, "y_titulo": 1.6, "size_titulo": 28 },
+          "panel_derecho": { "x": 7.1, "w": 5.53, "y": 1.6 },
+          "imagen": { "x": 7.1, "y": 1.9, "w": 5.53, "nota": "Preservar aspect ratio; no sangrar sobre la costura" }
+        },
+        "nota": "Una idea por panel. Nunca cruzar un bloque de texto sobre la costura en x≈6.55."
+      },
+      {
+        "id": "imagen_completa",
+        "nombre": "Imagen a sangre con texto sobre velo",
+        "fondo": "imagen propia del documento",
+        "tema": "oscuro",
+        "elementos": [
+          "imagen full-bleed como fondo (assets del documento, no de images/)",
+          "velo oscuro semitransparente para garantizar contraste",
+          "kicker + título corto",
+          "pie de foto o fuente"
+        ],
+        "geometria": {
+          "imagen": { "x": 0, "y": 0, "w": 13.33, "h": 7.5, "metodo": "addImage con sizing cover" },
+          "velo": { "x": 0, "y": 0, "w": 13.33, "h": 7.5, "fill": "#2C2A29", "opacidad": 0.55 },
+          "titulo": { "x": 0.9, "y": 4.6, "w": 9, "size": 34, "color": "#FFFFFF" },
+          "pie": { "componente": "nota_al_pie" }
+        },
+        "nota": "El velo es obligatorio: sin él el texto blanco falla sobre zonas claras de la foto."
+      },
+      {
+        "id": "secuencia_pasos",
+        "nombre": "Secuencia de pasos numerados",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light", "bg_content_rail_light"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "3 a 4 pasos con circleBadge numerado, título corto y descripción",
+          "conectores entre pasos"
+        ],
+        "geometria": {
+          "referencia": "reticula.columnas.4",
+          "pasos": { "w": 2.72, "x": [0.7, 3.77, 6.84, 9.91], "y": 2.4 },
+          "badge": { "d": 0.6, "offset_y": 0 },
+          "conectores": { "componente": "flecha_conector", "y_centro": 2.7 }
+        }
+      },
+      {
+        "id": "timeline_horizontal",
+        "nombre": "Línea de tiempo / roadmap",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "eje horizontal con hitos alternados arriba/abajo",
+          "banner inferior opcional con el estado actual"
+        ],
+        "geometria": {
+          "componente": "hito_timeline",
+          "eje": { "x": 0.9, "w": 11.53, "y": 3.9 },
+          "hitos_x_sugerido": [1.3, 3.5, 5.7, 7.9, 10.1, 12.1],
+          "max_hitos": 6
+        }
+      },
+      {
+        "id": "tabla_datos",
+        "nombre": "Tabla de datos",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light"],
+        "tema": "claro",
+        "elementos": ["kicker", "título", "tabla con encabezado oscuro y filas zebra", "nota de fuente"],
+        "geometria": {
+          "componente": "tabla",
+          "tabla": { "x": 0.7, "y": 2.15, "w": 11.93 },
+          "pie": { "componente": "nota_al_pie" }
+        },
+        "nota": "Sin imagen de fondo decorativa detrás de la tabla. Máximo 5 columnas y 8 filas visibles."
+      },
+      {
+        "id": "grafico",
+        "nombre": "Gráfico de datos",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light", "bg_content_solid_dark"],
+        "tema": "claro | oscuro",
+        "elementos": [
+          "kicker",
+          "título que enuncie la conclusión, no el tipo de gráfico",
+          "un solo gráfico",
+          "lectura o insight en texto al costado",
+          "nota de fuente"
+        ],
+        "geometria": {
+          "grafico": { "x": 0.7, "y": 2.15, "w": 7.8, "h": 4.0 },
+          "lectura": { "x": 8.9, "y": 2.15, "w": 3.73, "size": 14 },
+          "pie": { "componente": "nota_al_pie" }
+        },
+        "nota": "Ver sección graficos para tipos y colores permitidos. Un gráfico por slide."
+      },
+      {
+        "id": "comparativa_ejes",
+        "nombre": "Comparativa por ejes (A vs B)",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "tabla comparativa de 3 columnas: eje, opción A, opción B"
+        ],
+        "geometria": { "componente": "tabla_comparativa" },
+        "nota": "Para contraste conceptual denso (más de 3 ejes). Con 2 ejes o menos, usar comparacion sobre split."
+      },
+      {
+        "id": "matriz_2x2",
+        "nombre": "Matriz de cuadrantes",
+        "fondo": "blanco",
+        "assets_fondo": ["bg_content_solid_light"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "4 cuadrantes con etiquetas de eje X e Y",
+          "elementos posicionados como puntos o chips"
+        ],
+        "geometria": {
+          "area": { "x": 3.0, "y": 1.9, "w": 7.4, "h": 4.4 },
+          "ejes": { "grosor": 1.5, "color": "#D8D6D4" },
+          "etiquetas_eje": { "size": 12, "color": "#6B6967" },
+          "cuadrante_fill": ["#FFFFFF", "#F0EEEC"],
+          "items": { "componente": "chip", "max": 8 }
+        }
+      },
+      {
+        "id": "arquitectura",
+        "nombre": "Diagrama de arquitectura / componentes",
+        "fondo": "oscuro",
+        "assets_fondo": ["bg_content_solid_dark", "fono_contenido_negro_franja_izquierdo"],
+        "tema": "oscuro",
+        "elementos": [
+          "kicker con acento",
+          "título en blanco",
+          "cajas de componente agrupadas por capa, conectadas",
+          "leyenda de colores si hay más de dos tipos de componente"
+        ],
+        "geometria": {
+          "capas": { "y": [2.1, 3.6, 5.1], "alto": 1.2, "etiqueta_x": 0.7, "etiqueta_w": 1.8 },
+          "cajas": { "x_inicio": 2.8, "w": 2.2, "h": 1.0, "gutter": 0.3, "variante_tarjeta": "oscura" },
+          "conectores": { "componente": "flecha_conector", "color": "#8A8886" },
+          "leyenda": { "y": 6.5, "size": 11 }
+        },
+        "nota": "Máximo 3 capas y 4 cajas por capa. Si no cabe, dividir en dos slides por dominio."
+      },
+      {
+        "id": "antes_despues",
+        "nombre": "Antes / Después",
+        "fondo": "split",
+        "assets_fondo": ["bg_content_split_half"],
+        "tema": "mixto",
+        "elementos": [
+          "etiqueta ANTES en el panel claro con el estado actual",
+          "etiqueta DESPUÉS en el panel oscuro con el estado objetivo",
+          "chip de resultado o métrica de mejora"
+        ],
+        "geometria": {
+          "referencia": "reticula.variantes_por_fondo.split",
+          "etiqueta": { "componente": "chip", "y": 1.5 },
+          "lista": { "y_inicio": 2.3, "paso": 0.75, "max_items": 4 }
+        }
+      },
+      {
+        "id": "cita_destacada",
+        "nombre": "Cita / testimonio",
+        "fondo": "oscuro | acento",
+        "assets_fondo": ["fono_contenido_negro_franja_izquierdo", "bg_content_solid_dark"],
+        "tema": "oscuro",
+        "elementos": ["comilla decorativa", "texto de la cita", "autor y cargo"],
+        "geometria": {
+          "componente": "cita",
+          "texto": { "x": 1.6, "y": 2.4, "w": 10.1 },
+          "autor": { "x": 1.6, "y": 5.0, "w": 8 }
+        },
+        "sin_numero_pagina": false
+      },
+      {
+        "id": "pregunta_disparadora",
+        "nombre": "Pregunta que abre discusión",
+        "fondo": "acento",
+        "tema": "acento",
+        "elementos": ["pregunta corta centrada", "nota opcional de contexto"],
+        "geometria": {
+          "pregunta": { "x": 1.2, "y": 2.8, "w": 10.93, "size": 40, "align": "center" },
+          "contexto": { "x": 2.2, "y": 4.8, "w": 8.93, "size": 16, "align": "center" }
+        },
+        "sin_numero_pagina": true,
+        "nota": "Máximo 90 caracteres. Sirve para abrir bloque de Q&A o transición participativa."
+      },
+      {
+        "id": "codigo",
+        "nombre": "Código / payload técnico",
+        "fondo": "oscuro | claro",
+        "assets_fondo": ["bg_content_solid_dark", "bg_content_solid_light"],
+        "tema": "oscuro | claro",
+        "elementos": [
+          "kicker",
+          "título que explique qué hace el snippet",
+          "caja de código",
+          "lectura al costado o debajo señalando la línea clave"
+        ],
+        "geometria": {
+          "componente": "caja_codigo",
+          "caja": { "x": 0.7, "y": 2.15, "w": 7.8, "h": 4.2 },
+          "lectura": { "x": 8.9, "y": 2.15, "w": 3.73, "size": 14 }
+        }
+      },
+      {
+        "id": "takeaways",
+        "nombre": "Puntos clave para llevar",
+        "fondo": "blanco | oscuro",
+        "assets_fondo": ["bg_content_solid_light", "bg_content_solid_dark"],
+        "tema": "claro | oscuro",
+        "elementos": [
+          "kicker",
+          "título",
+          "3 puntos numerados con una frase cada uno",
+          "banner inferior con la acción esperada"
+        ],
+        "geometria": {
+          "referencia": "reticula.columnas.3",
+          "puntos": { "w": 3.74, "x": [0.7, 4.79, 8.88], "y": 2.4, "h": 2.8, "variante_tarjeta": "header_color" },
+          "banner": { "componente": "banner_enfasis" }
+        },
+        "nota": "Una frase por punto, no párrafos. Es el slide que la audiencia fotografía."
+      },
+      {
+        "id": "capitulo_progreso",
+        "nombre": "Marcador de capítulo con progreso",
+        "fondo": "acento | oscuro",
+        "tema": "acento | oscuro",
+        "elementos": [
+          "número y nombre del capítulo",
+          "lista de capítulos con el actual resaltado",
+          "barra de progreso del deck"
+        ],
+        "geometria": {
+          "numero": { "x": 0.9, "y": 1.6, "w": 3, "size": 72 },
+          "nombre": { "x": 0.9, "y": 3.4, "w": 7, "size": 32 },
+          "lista_capitulos": { "x": 8.4, "y": 1.8, "w": 4.2, "paso": 0.55, "size": 14 },
+          "progreso": { "componente": "barra_progreso", "x": 0.9, "y": 6.4, "w": 11.53 }
+        },
+        "nota": "Alternativa al separador plano cuando el deck es largo (más de 20 slides) y conviene orientar a la audiencia."
+      },
+      {
+        "id": "contacto",
+        "nombre": "Contacto / siguientes pasos",
+        "fondo": "oscuro",
+        "assets_fondo": ["fondo_contenido_negro_franjas_esquina"],
+        "tema": "oscuro",
+        "elementos": [
+          "título de siguiente paso",
+          "lista de acciones con responsable",
+          "datos de contacto o canal"
+        ],
+        "geometria": {
+          "titulo": { "x": 1.0, "y": 1.5, "w": 10, "size": 32 },
+          "acciones": { "x": 1.0, "y": 2.8, "paso": 0.8, "w": 7.5, "max_items": 4 },
+          "contacto": { "x": 1.0, "y": 6.0, "w": 8, "size": 14 }
+        },
+        "sin_numero_pagina": true
+      }
+    ]
+  },
+  "assets": {
+    "descripcion": "Recursos gráficos disponibles para usar como fondos, marcas de agua o elementos decorativos en los slides.",
+    "imagenes": [
+      {
+        "id": "fondo_blanco_bancolombia",
+        "ruta": "images/fondo_blanco_bancolombia.png",
+        "tipo_de_imagen": "Fondo de slide con marca de agua / isotipo",
+        "color_de_fondo": "#FFFFFF",
+        "uso_recomendado": [
+          "Slides de contenido sobre fondo blanco",
+          "Slides de cierre con identidad de marca",
+          "Cualquier slide donde se quiera reforzar la identidad Bancolombia de forma sutil"
+        ],
+        "elementos_visuales": [
+          {
+            "tipo": "Logotipo de marca",
+            "texto": "Bancolombia",
+            "simbolo": "Isotipo compuesto por tres líneas horizontales paralelas estilizadas con esquinas redondeadas",
+            "posicion": "Esquina inferior izquierda",
+            "color": "#000000"
+          }
+        ],
+        "composicion_general": "Diseño minimalista con un amplio espacio negativo en blanco y la identidad de marca ubicada sutilmente en el extremo inferior izquierdo.",
+        "como_usar_en_pptx": {
+          "metodo": "slide.background = { path }",
+          "parametros": {
+            "path": "images/fondo_blanco_bancolombia.png"
+          },
+          "nota": "Usar slide.background en lugar de addImage() para que la imagen sea el fondo real del slide, no una capa encima del contenido."
+        }
+      },
+      {
+        "id": "fondo_portada_bancolombia_negro",
+        "ruta": "images/fondo_portada_bancolombia_negro.png",
+        "tipo_de_imagen": "Diseño de portada / Fondo institucional oscuro con ondas de color",
+        "color_de_fondo": "#1E1C1A",
+        "uso_recomendado": [
+          "Slide de portada principal",
+          "Slide de cierre o sección de preguntas",
+          "Slides de sección sobre fondo oscuro con identidad de marca prominente"
+        ],
+        "elementos_visuales": [
+          {
+            "tipo": "Identidad de marca",
+            "marca": "Bancolombia",
+            "logo": {
+              "isotipo": "Tres líneas horizontales paralelas estilizadas con esquinas redondeadas en color blanco",
+              "texto": "Bancolombia en tipografía Sans-Serif color blanco"
+            },
+            "elemento_separador": "Línea vertical delgada de color blanco a la izquierda del logotipo",
+            "posicion": "Centro-derecha de la composición"
+          },
+          {
+            "tipo": "Gráficos abstractos / Vectores dinámicos",
+            "estilo": "Líneas orgánicas, curvas y fluidas con extremos redondeados (trazo de pincel digital continuo)",
+            "paleta_de_colores_ondas": [
+              {
+                "nombre": "Amarillo",
+                "hex": "#FCDB04"
+              },
+              {
+                "nombre": "Naranja / Coral",
+                "hex": "#FF7F41"
+              },
+              {
+                "nombre": "Morado / Violeta",
+                "hex": "#8F53FF"
+              }
+            ],
+            "disposicion_ondas": [
+              {
+                "ubicacion": "Zona superior derecha",
+                "descripcion": "Trayectoria vertical curva que enmarca el logotipo por el costado derecho, superponiendo trazos morados, amarillos y naranjas."
+              },
+              {
+                "ubicacion": "Zona inferior central",
+                "descripcion": "Onda horizontal que atraviesa la base de la imagen, combinando trazos naranjas, amarillos y morados en una silueta sinuosa."
+              }
+            ]
+          }
+        ],
+        "estilo_y_composicion": "Diseño corporativo moderno y minimalista. El uso del espacio negativo oscuro resalta el dinamismo y brillo de las líneas de color, mientras que la disposición descentrada del logo aporta un flujo visual limpio e institucional, ideal para portadas digitales o presentaciones.",
+        "nota_de_contenido": "Al usar este fondo, colocar el texto del título en la zona izquierda (x: 0.7–6.0) para no solapar el logotipo. Usar color blanco o acentos de la paleta marca para el texto.",
+        "como_usar_en_pptx": {
+          "metodo": "slide.background = { path }",
+          "parametros": {
+            "path": "images/fondo_portada_bancolombia_negro.png"
+          },
+          "nota": "Usar slide.background en lugar de addImage() para que la imagen sea el fondo real del slide, no una capa encima del contenido."
+        }
+      },
+      {
+        "id": "fondo_portada_bancolombia_blanco",
+        "ruta": "images/fondo_portada_bancolombia_blanco.png",
+        "tipo_de_imagen": "Diseño de portada / Fondo institucional claro con franjas de color (alternativa a portada negra)",
+        "color_de_fondo": "#FFFFFF",
+        "resolucion_referencia": {
+          "ancho": 2159,
+          "alto": 1220
+        },
+        "relacion_aspecto": "16:9",
+        "uso_recomendado": [
+          "Slide de portada principal sobre fondo claro",
+          "Portada alternativa cuando se prefiera tipografía oscura",
+          "Apertura de presentación con identidad Bancolombia + acentos de color a la derecha"
+        ],
+        "no_usar_para": [
+          "Slides de contenido interno (usar fondo_blanco_bancolombia)",
+          "Portadas que requieran tipografía blanca (usar fondo_portada_bancolombia_negro)"
+        ],
+        "elementos_visuales": [
+          {
+            "tipo": "Identidad de marca",
+            "marca": "Bancolombia",
+            "logo": {
+              "isotipo": "Tres líneas horizontales paralelas estilizadas con esquinas redondeadas en color negro",
+              "texto": "Bancolombia en tipografía Sans-Serif color negro (#2C2A29 / #000000)"
+            },
+            "posicion": "Esquina inferior izquierda"
+          },
+          {
+            "tipo": "Gráficos abstractos / Franjas segmentadas",
+            "estilo": "Segmentos gruesos tipo cápsula (extremos redondeados), ligeramente desfasados, formando una trayectoria en S desde el centro-inferior hacia la esquina superior derecha",
+            "paleta_de_colores_franjas": [
+              {
+                "nombre": "Amarillo",
+                "hex": "#F8D800",
+                "aprox_marca": "#FFD204"
+              },
+              {
+                "nombre": "Verde",
+                "hex": "#00B080",
+                "aprox_marca": "#00C587"
+              },
+              {
+                "nombre": "Morado / Violeta",
+                "hex": "#8060A8"
+              }
+            ],
+            "disposicion": [
+              {
+                "ubicacion": "Mitad derecha del lienzo",
+                "descripcion": "Haz de franjas paralelas en amarillo, verde y morado que suben en curva hacia la esquina superior derecha. Concentran el peso visual a la derecha."
+              },
+              {
+                "ubicacion": "Zona inferior central → derecha",
+                "descripcion": "Continuación de la misma trayectoria; deja libre el cuadrante superior-izquierdo y centro-izquierdo para título y subtítulo."
+              }
+            ]
+          }
+        ],
+        "estilo_y_composicion": "Portada clara, minimalista y corporativa. Amplio espacio negativo blanco a la izquierda; logo anclado abajo-izquierda; dinamismo de color solo en el flanco derecho. Complemento simétrico de fondo_portada_bancolombia_negro.",
+        "area_segura_contenido": {
+          "titulo_y_subtitulo": "Cuadrante izquierdo / centro-izquierdo",
+          "evitar": [
+            "Mitad derecha (franjas de color)",
+            "Esquina inferior izquierda (logo Bancolombia)",
+            "Esquina superior derecha (terminación de franjas)"
+          ],
+          "guia_pptx": {
+            "texto_x": "0.7 – 7.5",
+            "texto_y": "1.8 – 5.0",
+            "color_titulo": "#2C2A29",
+            "color_kicker_o_acento": "Paleta marca (azul #01CDEB, verde #00C587, naranja #FF803A)",
+            "color_subtitulo": "#6B6967 o acento marca"
+          }
+        },
+        "tipografia_recomendada": {
+          "color_texto_principal": "#2C2A29",
+          "color_subtitulo": "#6B6967",
+          "contraste": "Alto sobre blanco",
+          "nota": "Cuerpo y títulos en negro/gris. Nunca texto blanco sobre este fondo."
+        },
+        "nota_de_contenido": "Usar como slide.background en la portada. Título grande a la izquierda (negro). Kicker arriba en color de acento. No colocar elementos sobre las franjas ni sobre el logo. Sin número de página en portada. Diferenciar de fondo_blanco_bancolombia: este asset es solo portada (franjas decorativas a la derecha); el blanco simple es para contenido interno.",
+        "como_usar_en_pptx": {
+          "metodo": "slide.background = { path }",
+          "parametros": {
+            "path": "images/fondo_portada_bancolombia_blanco.png"
+          },
+          "ejemplo": "bgImage(s, \"images/fondo_portada_bancolombia_blanco.png\");",
+          "nota": "Usar slide.background en lugar de addImage() para que la imagen sea el fondo real del slide, no una capa encima del contenido."
+        }
+      },
+      {
+        "id": "fondo_contenido_negro_franjas_esquina",
+        "ruta": "images/fondo_contenido_negro_franjas_esquina.png",
+        "tipo_de_imagen": "Fondo para contenido / Diapositiva interna institucional",
+        "color_de_fondo": "#1E1C1A",
+        "uso_recomendado": [
+          "Slides de contenido interno sobre fondo oscuro",
+          "Slides de sección, agenda o comparación con fondo negro",
+          "Cualquier slide que requiera identidad visual de marca sin logotipo explícito"
+        ],
+        "espacio_util": "Área central amplia y despejada, diseñada específicamente para la inserción de texto, datos, gráficos o elementos de contenido principal.",
+        "elementos_visuales": [
+          {
+            "tipo": "Gráficos abstractos / Marcos ornamentales",
+            "estilo": "Líneas orgánicas, curvas y fluidas con extremos redondeados que enmarcan la composición",
+            "paleta_de_colores_ondas": [
+              {
+                "nombre": "Amarillo",
+                "hex": "#FCDB04"
+              },
+              {
+                "nombre": "Celeste / Azul claro",
+                "hex": "#4AA1FF"
+              },
+              {
+                "nombre": "Morado / Violeta",
+                "hex": "#8F53FF"
+              }
+            ],
+            "disposicion_marcos": [
+              {
+                "ubicacion": "Esquina superior izquierda",
+                "descripcion": "Arco concéntrico compuesto por tres trazos curvos superpuestos: amarillo en el extremo inferior, celeste en el medio y morado en el extremo interno."
+              },
+              {
+                "ubicacion": "Esquina inferior derecha",
+                "descripcion": "Arco concéntrico inverso que replica el patrón de la esquina opuesta, distribuyendo trazos en color morado, celeste y amarillo."
+              }
+            ]
+          }
+        ],
+        "estilo_y_composicion": "Diseño corporativo funcional y minimalista. A diferencia de las portadas, carece de logotipos directos para maximizar el espacio libre. Las ondas de color en las esquinas opuestas guían la mirada diagonalmente a través de la pantalla, manteniendo la identidad visual de la marca de forma sutil.",
+        "nota_de_contenido": "El área disponible para contenido va de x: 0.6 a x: 12.7 y de y: 0.5 a y: 6.8. Usar texto en blanco o en los colores de acento de la paleta marca.",
+        "como_usar_en_pptx": {
+          "metodo": "slide.background = { path }",
+          "parametros": {
+            "path": "images/fondo_contenido_negro_franjas_esquina.png"
+          },
+          "nota": "Usar slide.background en lugar de addImage() para que la imagen sea el fondo real del slide, no una capa encima del contenido."
+        }
+      },
+      {
+        "id": "fono_contenido_negro_franja_izquierdo",
+        "ruta": "images/fono_contenido_negro_franja_izquierdo.png",
+        "tipo_de_imagen": "Fondo minimalista para contenido / Diapositiva interna con arcos decorativos en esquinas",
+        "color_de_fondo": "#2B2724",
+        "nombre_disenio": "minimal_dark_corner_arcs",
+        "categoria": "presentation_background",
+        "estilo": {
+          "lenguaje_visual": "Minimalista",
+          "estilo_visual": "Flat Design",
+          "complejidad": "Muy baja",
+          "modernidad": "Alta",
+          "corporativo": true,
+          "limpio": true,
+          "jugueton": true
+        },
+        "lienzo": {
+          "relacion_aspecto": "16:9",
+          "resolucion_referencia": {
+            "ancho": 1599,
+            "alto": 898
+          },
+          "area_segura": {
+            "titulo": "Superior izquierda",
+            "contenido": "Centro",
+            "evitar": [
+              "Esquina superior derecha",
+              "Esquina inferior izquierda"
+            ]
+          }
+        },
+        "uso_recomendado": [
+          "Portadas",
+          "Separadores de sección",
+          "Presentaciones corporativas",
+          "Presentaciones de innovación",
+          "Tecnología",
+          "Educación",
+          "Eventos"
+        ],
+        "espacio_util": "Área central completamente libre (~90% del lienzo). Diseñado para maximizar el espacio disponible para texto, gráficos o datos.",
+        "elementos_visuales": [
+          {
+            "tipo": "Gráficos abstractos / Arcos concéntricos decorativos",
+            "estilo": "Arcos concéntricos gruesos con extremos completamente redondeados (Flat Design)",
+            "trazo": {
+              "forma": "Redondeada",
+              "line_cap": "Round",
+              "grosor": "Muy grueso (18–28 px aproximadamente)"
+            },
+            "disposicion": [
+              {
+                "ubicacion": "Esquina superior derecha",
+                "descripcion": "Grupo de tres arcos concéntricos parcialmente fuera del lienzo (~35% visible). Colores de interior a exterior: rosa pastel (#F2B5CF), naranja cálido (#F77C3C), amarillo dorado (#FFD633).",
+                "porcentaje_visible": 0.35
+              },
+              {
+                "ubicacion": "Esquina inferior izquierda",
+                "descripcion": "Espejo diagonal del grupo superior derecho (~35% visible). Colores de interior a exterior: rosa pastel (#F2B5CF), amarillo dorado (#FFD633), naranja cálido (#F77C3C).",
+                "porcentaje_visible": 0.35
+              }
+            ],
+            "paleta_de_acentos": [
+              {
+                "nombre": "Soft Pink",
+                "hex": "#F2B5CF"
+              },
+              {
+                "nombre": "Warm Orange",
+                "hex": "#F77C3C"
+              },
+              {
+                "nombre": "Golden Yellow",
+                "hex": "#FFD633"
+              }
+            ],
+            "espaciado": "Uniforme entre arcos"
+          }
+        ],
+        "composicion": {
+          "layout": "Esquinas decoradas — simetría diagonal",
+          "peso_visual": {
+            "esquina_superior_derecha": 0.5,
+            "esquina_inferior_izquierda": 0.5,
+            "centro": 0.0
+          },
+          "simetria": "Diagonal",
+          "espacio_negativo": "Muy alto (≈90%)",
+          "area_de_foco": "Centro completamente libre para contenido"
+        },
+        "geometria": {
+          "elementos": [
+            "Arcos",
+            "Segmentos circulares",
+            "Curvas suaves"
+          ],
+          "esquinas": "Redondeadas",
+          "angulos": "Ninguno"
+        },
+        "paleta_colores": {
+          "fondo_principal": "#2B2724",
+          "colores_acento": [
+            {
+              "nombre": "Soft Pink",
+              "hex": "#F2B5CF"
+            },
+            {
+              "nombre": "Warm Orange",
+              "hex": "#F77C3C"
+            },
+            {
+              "nombre": "Golden Yellow",
+              "hex": "#FFD633"
+            }
+          ]
+        },
+        "tipografia_recomendada": {
+          "color_texto_principal": "#FFFFFF",
+          "color_subtitulo": "#D6D6D6",
+          "contraste": "Muy alto"
+        },
+        "tokens_de_diseno": {
+          "border_radius": "999px",
+          "stroke_weight": "Extra Bold",
+          "espaciado": "Amplio",
+          "margen_desde_bordes": "Parcialmente fuera del canvas",
+          "densidad_visual": "Baja"
+        },
+        "nota_de_contenido": "El área disponible para contenido cubre prácticamente todo el lienzo. Evitar colocar texto o elementos clave en las esquinas superior derecha e inferior izquierda. Usar texto en blanco (#FFFFFF) o gris claro (#D6D6D6) sobre el fondo carbón.",
+        "como_usar_en_pptx": {
+          "metodo": "slide.background = { path }",
+          "parametros": {
+            "path": "images/fono_contenido_negro_franja_izquierdo.png"
+          },
+          "nota": "Usar slide.background en lugar de addImage() para que la imagen sea el fondo real del slide, no una capa encima del contenido."
+        }
+      },
+      {
+        "id": "bg_content_solid_dark",
+        "ruta": "images/bg_content_solid_dark.png",
+        "tipo_de_imagen": "Content background / solid dark charcoal",
+        "categoria": "content_background",
+        "color_de_fondo": "#272422",
+        "resolucion_referencia": {
+          "ancho": 2159,
+          "alto": 1220
+        },
+        "relacion_aspecto": "16:9",
+        "uso_recomendado": [
+          "Internal content slides on a dark field",
+          "Emphasis / quote slides without decorative waves",
+          "Full-bleed dark layouts where brand ornaments are not needed"
+        ],
+        "no_usar_para": [
+          "Cover slides with Bancolombia logo (use fondo_portada_*)",
+          "Light-theme content (use bg_content_solid_light or fondo_blanco_bancolombia)"
+        ],
+        "elementos_visuales": [
+          {
+            "tipo": "Solid fill",
+            "descripcion": "Uniform matte charcoal across the full canvas. No logo, no ornaments."
+          }
+        ],
+        "estilo_y_composicion": "Minimal flat dark base. Maximum usable area for text and cards.",
+        "area_segura_contenido": {
+          "guia_pptx": {
+            "texto_x": "0.6 – 12.7",
+            "texto_y": "0.5 – 6.8",
+            "color_titulo": "#FFFFFF",
+            "color_cuerpo": "#FFFFFF or #D6D6D6"
+          },
+          "evitar": []
+        },
+        "tipografia_recomendada": {
+          "color_texto_principal": "#FFFFFF",
+          "color_subtitulo": "#D6D6D6",
+          "contraste": "Very high",
+          "nota": "Body text white or light gray only. Never dark text on this background."
+        },
+        "nota_de_contenido": "Full canvas is usable. Prefer white/light text and brand accent kickers (azul, naranja, verde).",
+        "como_usar_en_pptx": {
+          "metodo": "slide.background = { path }",
+          "parametros": {
+            "path": "images/bg_content_solid_dark.png"
+          },
+          "ejemplo": "bgImage(s, \"images/bg_content_solid_dark.png\");",
+          "nota": "Use slide.background, not addImage()."
+        }
+      },
+      {
+        "id": "bg_content_solid_light",
+        "ruta": "images/bg_content_solid_light.png",
+        "tipo_de_imagen": "Content background / solid light gray",
+        "categoria": "content_background",
+        "color_de_fondo": "#E2E0E1",
+        "resolucion_referencia": {
+          "ancho": 2159,
+          "alto": 1220
+        },
+        "relacion_aspecto": "16:9",
+        "uso_recomendado": [
+          "Neutral light content slides without brand watermark",
+          "Card-heavy layouts that need a soft gray field instead of pure white",
+          "Alternative to fondo_blanco_bancolombia when the logo must not appear"
+        ],
+        "no_usar_para": [
+          "Dark-theme slides",
+          "Cover slides (use fondo_portada_*)"
+        ],
+        "elementos_visuales": [
+          {
+            "tipo": "Solid fill",
+            "descripcion": "Uniform light gray (#E2E0E1). No logo, no ornaments."
+          }
+        ],
+        "estilo_y_composicion": "Quiet neutral base. Soft contrast for white cards with softShadow.",
+        "area_segura_contenido": {
+          "guia_pptx": {
+            "texto_x": "0.6 – 12.7",
+            "texto_y": "0.5 – 6.8",
+            "color_titulo": "#2C2A29",
+            "color_cuerpo": "#2C2A29 or #6B6967"
+          },
+          "evitar": []
+        },
+        "tipografia_recomendada": {
+          "color_texto_principal": "#2C2A29",
+          "color_subtitulo": "#6B6967",
+          "contraste": "High",
+          "nota": "Dark text only. Never white body text on this background."
+        },
+        "nota_de_contenido": "Full canvas usable. Kickers in brand accent colors; titles and body in negro / gris_texto_suave.",
+        "como_usar_en_pptx": {
+          "metodo": "slide.background = { path }",
+          "parametros": {
+            "path": "images/bg_content_solid_light.png"
+          },
+          "ejemplo": "bgImage(s, \"images/bg_content_solid_light.png\");",
+          "nota": "Use slide.background, not addImage()."
+        }
+      },
+      {
+        "id": "bg_content_split_half",
+        "ruta": "images/bg_content_split_half.png",
+        "tipo_de_imagen": "Content background / vertical 50–50 split white | dark",
+        "categoria": "content_background",
+        "color_de_fondo": "#FFFFFF | #2A2A29",
+        "resolucion_referencia": {
+          "ancho": 2159,
+          "alto": 1220
+        },
+        "relacion_aspecto": "16:9",
+        "layout": {
+          "tipo": "vertical_split",
+          "izquierda": {
+            "porcentaje_ancho": 0.49,
+            "color": "#FEFFFF",
+            "aprox": "#FFFFFF"
+          },
+          "derecha": {
+            "porcentaje_ancho": 0.51,
+            "color": "#2A2A29"
+          },
+          "corte_x_in": 6.55
+        },
+        "uso_recomendado": [
+          "Two-column comparison slides (concept A | concept B)",
+          "Text on one half + image or bullets on the other",
+          "Cloud vs Self-hosted style layouts"
+        ],
+        "no_usar_para": [
+          "Single-column dense content that crosses the center line",
+          "Cover slides"
+        ],
+        "elementos_visuales": [
+          {
+            "tipo": "Vertical bipartition",
+            "descripcion": "Sharp center cut: left pure white, right charcoal (#2A2A29)."
+          }
+        ],
+        "estilo_y_composicion": "High-contrast dual panel. Keep each half self-contained; do not straddle the split with a single text block.",
+        "area_segura_contenido": {
+          "panel_izquierdo": {
+            "guia_pptx": {
+              "x": "0.5 – 6.2",
+              "y": "0.5 – 6.8"
+            },
+            "color_texto": "#2C2A29"
+          },
+          "panel_derecho": {
+            "guia_pptx": {
+              "x": "7.0 – 12.7",
+              "y": "0.5 – 6.8"
+            },
+            "color_texto": "#FFFFFF"
+          },
+          "evitar": [
+            "Center seam (~x: 6.5)"
+          ]
+        },
+        "tipografia_recomendada": {
+          "izquierda": {
+            "titulo": "#2C2A29",
+            "cuerpo": "#2C2A29 / #6B6967"
+          },
+          "derecha": {
+            "titulo": "#FFFFFF",
+            "cuerpo": "#FFFFFF / #D6D6D6"
+          },
+          "nota": "Match text color to the panel background. Never white text on the left half or dark text on the right half."
+        },
+        "nota_de_contenido": "One idea per half. Accents from brand palette for kickers/icons. Optional vertical divider is already implied by the color seam.",
+        "como_usar_en_pptx": {
+          "metodo": "slide.background = { path }",
+          "parametros": {
+            "path": "images/bg_content_split_half.png"
+          },
+          "ejemplo": "bgImage(s, \"images/bg_content_split_half.png\");",
+          "nota": "Use slide.background, not addImage()."
+        }
+      },
+      {
+        "id": "bg_content_rail_light",
+        "ruta": "images/bg_content_rail_light.png",
+        "tipo_de_imagen": "Content background / left white rail (~24%) + light gray field",
+        "categoria": "content_background",
+        "color_de_fondo": "#FEFFFF | #F5F5F5",
+        "resolucion_referencia": {
+          "ancho": 2159,
+          "alto": 1220
+        },
+        "relacion_aspecto": "16:9",
+        "layout": {
+          "tipo": "left_rail",
+          "rail": {
+            "porcentaje_ancho": 0.243,
+            "color": "#FEFFFF",
+            "aprox": "#FFFFFF"
+          },
+          "campo": {
+            "porcentaje_ancho": 0.757,
+            "color": "#F5F5F5"
+          },
+          "corte_x_in": 3.24
+        },
+        "uso_recomendado": [
+          "Light content with a narrow left column for section label, number, or icon stack",
+          "Agenda / index variants",
+          "Slides that need subtle structure without a dark theme"
+        ],
+        "no_usar_para": [
+          "Dark typography on a dark field (this is light-only)",
+          "Cover slides"
+        ],
+        "elementos_visuales": [
+          {
+            "tipo": "Left rail + content field",
+            "descripcion": "White vertical strip (~24% width) then soft light gray (#F5F5F5) for the main area."
+          }
+        ],
+        "estilo_y_composicion": "Soft two-tone light layout. Rail for meta; field for primary content.",
+        "area_segura_contenido": {
+          "rail": {
+            "guia_pptx": {
+              "x": "0.4 – 3.0",
+              "y": "0.5 – 6.8"
+            },
+            "uso": "Kicker vertical, section number, icon column"
+          },
+          "campo": {
+            "guia_pptx": {
+              "x": "3.5 – 12.7",
+              "y": "0.5 – 6.8"
+            },
+            "uso": "Title, body, cards"
+          },
+          "evitar": [
+            "Seam at ~x: 3.2"
+          ]
+        },
+        "tipografia_recomendada": {
+          "color_texto_principal": "#2C2A29",
+          "color_subtitulo": "#6B6967",
+          "contraste": "High",
+          "nota": "Dark text on both rail and field. Accent colors only for kickers/icons."
+        },
+        "nota_de_contenido": "Keep rail sparse (one short label or badge). Put dense content only in the gray field.",
+        "como_usar_en_pptx": {
+          "metodo": "slide.background = { path }",
+          "parametros": {
+            "path": "images/bg_content_rail_light.png"
+          },
+          "ejemplo": "bgImage(s, \"images/bg_content_rail_light.png\");",
+          "nota": "Use slide.background, not addImage()."
+        }
+      },
+      {
+        "id": "bg_content_rail_dark",
+        "ruta": "images/bg_content_rail_dark.png",
+        "tipo_de_imagen": "Content background / left white rail (~24%) + dark charcoal field",
+        "categoria": "content_background",
+        "color_de_fondo": "#FEFFFF | #2A2A29",
+        "resolucion_referencia": {
+          "ancho": 2159,
+          "alto": 1220
+        },
+        "relacion_aspecto": "16:9",
+        "layout": {
+          "tipo": "left_rail",
+          "rail": {
+            "porcentaje_ancho": 0.243,
+            "color": "#FEFFFF",
+            "aprox": "#FFFFFF"
+          },
+          "campo": {
+            "porcentaje_ancho": 0.757,
+            "color": "#2A2A29"
+          },
+          "corte_x_in": 3.24
+        },
+        "uso_recomendado": [
+          "Dark content with a light left sidebar for labels / step numbers",
+          "Process or chapter slides",
+          "High-contrast narrative layouts"
+        ],
+        "no_usar_para": [
+          "All-light slides",
+          "Cover slides"
+        ],
+        "elementos_visuales": [
+          {
+            "tipo": "Left rail + content field",
+            "descripcion": "White vertical strip (~24% width) then charcoal field (#2A2A29) for main content."
+          }
+        ],
+        "estilo_y_composicion": "High-contrast rail layout. Meta on white; story on dark.",
+        "area_segura_contenido": {
+          "rail": {
+            "guia_pptx": {
+              "x": "0.4 – 3.0",
+              "y": "0.5 – 6.8"
+            },
+            "color_texto": "#2C2A29",
+            "uso": "Section number, short kicker, icon"
+          },
+          "campo": {
+            "guia_pptx": {
+              "x": "3.5 – 12.7",
+              "y": "0.5 – 6.8"
+            },
+            "color_texto": "#FFFFFF",
+            "uso": "Title, body, cards on dark"
+          },
+          "evitar": [
+            "Seam at ~x: 3.2"
+          ]
+        },
+        "tipografia_recomendada": {
+          "rail": {
+            "texto": "#2C2A29"
+          },
+          "campo": {
+            "titulo": "#FFFFFF",
+            "cuerpo": "#FFFFFF / #D6D6D6"
+          },
+          "nota": "Dark text only on the white rail; light text only on the charcoal field."
+        },
+        "nota_de_contenido": "Do not place white-on-white in the rail or dark-on-dark in the field. Brand accents for icons/kickers.",
+        "como_usar_en_pptx": {
+          "metodo": "slide.background = { path }",
+          "parametros": {
+            "path": "images/bg_content_rail_dark.png"
+          },
+          "ejemplo": "bgImage(s, \"images/bg_content_rail_dark.png\");",
+          "nota": "Use slide.background, not addImage()."
+        }
+      }
+    ],
+    "iconos": {
+      "descripcion": "Iconos lineales multicolor (trazo grueso, caps redondeados, fondo transparente). Misma familia visual. Escalables: usar addImage con w/h en pulgadas; mantener aspect ratio (no estirar). Funcionan sobre fondos claros u oscuros.",
+      "principio_de_uso": "El icono debe ser coherente con la intención de comunicación del mensaje o bloque. Si el significado no es preciso o el vínculo es forzado/decorativo, no usar icono: priorizar tipografía, color o layout.",
+      "estilo": {
+        "lenguaje_visual": "Flat line art / monoline",
+        "stroke": "Thick, rounded caps",
+        "relleno": "Outline only (sin fill sólido del sujeto)",
+        "fondo_archivo": "Transparent (RGBA alpha)",
+        "paleta_segmentos": [
+          {
+            "nombre": "amarillo",
+            "hex": "#FCD824",
+            "aprox_marca": "#FFD204"
+          },
+          {
+            "nombre": "verde",
+            "hex": "#00C084",
+            "aprox_marca": "#00C587"
+          },
+          {
+            "nombre": "naranja",
+            "hex": "#FC7830",
+            "aprox_marca": "#FF803A"
+          },
+          {
+            "nombre": "rosado",
+            "hex": "#F0B4CC",
+            "aprox_marca": "#FFB8D2"
+          },
+          {
+            "nombre": "azul_cyan",
+            "hex": "#00CCE4",
+            "aprox_marca": "#01CDEB"
+          },
+          {
+            "nombre": "morado",
+            "hex": "#9060CC"
+          }
+        ]
+      },
+      "tamanos_recomendados_in": {
+        "xs": 0.35,
+        "sm": 0.5,
+        "md": 0.7,
+        "lg": 1.0,
+        "xl": 1.4,
+        "nota": "Elegir según jerarquía. En badges/tarjetas: sm–md. Como hero decorativo: lg–xl."
+      },
+      "como_usar_en_pptx": {
+        "metodo": "slide.addImage({ path, x, y, w, h })",
+        "ejemplo": "s.addImage({ path: \"images/icons/icon_eye.png\", x: 0.9, y: 2.3, w: 0.7, h: 0.62 });",
+        "reglas": [
+          "Coherencia semántica obligatoria: el icono refuerza la idea del texto; si no es preciso, omitirlo.",
+          "No usar iconos como relleno decorativo ni por simetría visual.",
+          "Preservar aspect ratio del asset (ver campo aspect_ratio de cada icono).",
+          "No usar como slide.background.",
+          "Sobre fondo oscuro o claro: el trazo multicolor ya aporta contraste; no hace falta círculo de color debajo salvo composición.",
+          "Sustituto tipográfico de iconCircle cuando se quiera identidad ilustrada (y el significado sea claro)."
+        ]
+      },
+      "catalogo": [
+        {
+          "id": "icon_eye",
+          "ruta": "images/icons/icon_eye.png",
+          "sujeto": "Eye / visibility",
+          "tags": [
+            "eye",
+            "vision",
+            "monitor",
+            "observe",
+            "insight"
+          ],
+          "resolucion_px": {
+            "ancho": 337,
+            "alto": 297
+          },
+          "aspect_ratio": 1.135,
+          "content_bbox_px": [
+            4,
+            26,
+            334,
+            277
+          ],
+          "uso_recomendado": [
+            "Visibilidad de datos",
+            "Monitoreo",
+            "Insight / observación"
+          ]
+        },
+        {
+          "id": "icon_car",
+          "ruta": "images/icons/icon_car.png",
+          "sujeto": "Car (front view)",
+          "tags": [
+            "car",
+            "transport",
+            "mobility",
+            "vehicle"
+          ],
+          "resolucion_px": {
+            "ancho": 337,
+            "alto": 297
+          },
+          "aspect_ratio": 1.135,
+          "content_bbox_px": [
+            13,
+            16,
+            327,
+            282
+          ],
+          "uso_recomendado": [
+            "Movilidad",
+            "Transporte",
+            "Casos automotrices"
+          ]
+        },
+        {
+          "id": "icon_laptop",
+          "ruta": "images/icons/icon_laptop.png",
+          "sujeto": "Laptop / computer",
+          "tags": [
+            "laptop",
+            "computer",
+            "device",
+            "tech",
+            "work"
+          ],
+          "resolucion_px": {
+            "ancho": 337,
+            "alto": 297
+          },
+          "aspect_ratio": 1.135,
+          "content_bbox_px": [
+            15,
+            31,
+            328,
+            251
+          ],
+          "uso_recomendado": [
+            "Trabajo digital",
+            "Desarrollo",
+            "Herramientas / dispositivos"
+          ]
+        },
+        {
+          "id": "icon_headset",
+          "ruta": "images/icons/icon_headset.png",
+          "sujeto": "Headset with mic",
+          "tags": [
+            "headset",
+            "support",
+            "helpdesk",
+            "audio",
+            "communication"
+          ],
+          "resolucion_px": {
+            "ancho": 337,
+            "alto": 297
+          },
+          "aspect_ratio": 1.135,
+          "content_bbox_px": [
+            12,
+            5,
+            325,
+            286
+          ],
+          "uso_recomendado": [
+            "Soporte",
+            "Contact center",
+            "Comunicación"
+          ]
+        },
+        {
+          "id": "icon_speed_code",
+          "ruta": "images/icons/icon_speed_code.png",
+          "sujeto": "Speed lines + code bracket",
+          "tags": [
+            "code",
+            "speed",
+            "automation",
+            "programming",
+            "performance"
+          ],
+          "resolucion_px": {
+            "ancho": 337,
+            "alto": 297
+          },
+          "aspect_ratio": 1.135,
+          "content_bbox_px": [
+            31,
+            43,
+            329,
+            246
+          ],
+          "uso_recomendado": [
+            "Automatización rápida",
+            "Low-code / código",
+            "Performance"
+          ]
+        },
+        {
+          "id": "icon_airplane",
+          "ruta": "images/icons/icon_airplane.png",
+          "sujeto": "Airplane",
+          "tags": [
+            "airplane",
+            "travel",
+            "flight",
+            "deploy",
+            "launch"
+          ],
+          "resolucion_px": {
+            "ancho": 335,
+            "alto": 297
+          },
+          "aspect_ratio": 1.128,
+          "content_bbox_px": [
+            31,
+            10,
+            312,
+            291
+          ],
+          "uso_recomendado": [
+            "Lanzamiento / deploy",
+            "Viajes",
+            "Alcance global"
+          ]
+        },
+        {
+          "id": "icon_coffee",
+          "ruta": "images/icons/icon_coffee.png",
+          "sujeto": "Coffee / hot beverage cup",
+          "tags": [
+            "coffee",
+            "break",
+            "cafe",
+            "hospitality"
+          ],
+          "resolucion_px": {
+            "ancho": 326,
+            "alto": 297
+          },
+          "aspect_ratio": 1.098,
+          "content_bbox_px": [
+            22,
+            6,
+            312,
+            287
+          ],
+          "uso_recomendado": [
+            "Pausa / break",
+            "Cultura de equipo",
+            "Hospitality"
+          ]
+        },
+        {
+          "id": "icon_shield_alert",
+          "ruta": "images/icons/icon_shield_alert.png",
+          "sujeto": "Shield with exclamation",
+          "tags": [
+            "security",
+            "alert",
+            "warning",
+            "protection",
+            "risk"
+          ],
+          "resolucion_px": {
+            "ancho": 324,
+            "alto": 330
+          },
+          "aspect_ratio": 0.982,
+          "content_bbox_px": [
+            29,
+            7,
+            280,
+            321
+          ],
+          "uso_recomendado": [
+            "Seguridad",
+            "Alertas",
+            "Compliance / riesgo"
+          ]
+        },
+        {
+          "id": "icon_storefront",
+          "ruta": "images/icons/icon_storefront.png",
+          "sujeto": "Storefront with awning",
+          "tags": [
+            "store",
+            "shop",
+            "retail",
+            "commerce",
+            "business"
+          ],
+          "resolucion_px": {
+            "ancho": 324,
+            "alto": 330
+          },
+          "aspect_ratio": 0.982,
+          "content_bbox_px": [
+            42,
+            24,
+            293,
+            305
+          ],
+          "uso_recomendado": [
+            "Retail / comercio",
+            "Negocio local",
+            "Canales de venta"
+          ]
+        },
+        {
+          "id": "icon_thermometer",
+          "ruta": "images/icons/icon_thermometer.png",
+          "sujeto": "Thermometer with level marks",
+          "tags": [
+            "thermometer",
+            "status",
+            "health",
+            "metrics",
+            "temperature"
+          ],
+          "resolucion_px": {
+            "ancho": 324,
+            "alto": 330
+          },
+          "aspect_ratio": 0.982,
+          "content_bbox_px": [
+            86,
+            10,
+            274,
+            323
+          ],
+          "uso_recomendado": [
+            "Métricas / status",
+            "Salud del sistema",
+            "Niveles"
+          ]
+        },
+        {
+          "id": "icon_user",
+          "ruta": "images/icons/icon_user.png",
+          "sujeto": "User / person silhouette",
+          "tags": [
+            "user",
+            "person",
+            "profile",
+            "avatar",
+            "identity"
+          ],
+          "resolucion_px": {
+            "ancho": 315,
+            "alto": 307
+          },
+          "aspect_ratio": 1.026,
+          "content_bbox_px": [
+            17,
+            9,
+            299,
+            289
+          ],
+          "uso_recomendado": [
+            "Usuario / perfil",
+            "Personas",
+            "Roles"
+          ]
+        },
+        {
+          "id": "icon_diamond",
+          "ruta": "images/icons/icon_diamond.png",
+          "sujeto": "Diamond / gem",
+          "tags": [
+            "diamond",
+            "value",
+            "quality",
+            "premium"
+          ],
+          "resolucion_px": {
+            "ancho": 322,
+            "alto": 274
+          },
+          "aspect_ratio": 1.175,
+          "content_bbox_px": [
+            3,
+            12,
+            316,
+            271
+          ],
+          "uso_recomendado": [
+            "Valor / calidad",
+            "Premium",
+            "Highlights"
+          ]
+        },
+        {
+          "id": "icon_shop",
+          "ruta": "images/icons/icon_shop.png",
+          "sujeto": "Shop / marketplace facade",
+          "tags": [
+            "shop",
+            "marketplace",
+            "store",
+            "retail"
+          ],
+          "resolucion_px": {
+            "ancho": 310,
+            "alto": 302
+          },
+          "aspect_ratio": 1.026,
+          "content_bbox_px": [
+            30,
+            8,
+            281,
+            289
+          ],
+          "uso_recomendado": [
+            "Marketplace",
+            "Tienda",
+            "Variante de comercio (junto a icon_storefront)"
+          ]
+        },
+        {
+          "id": "icon_workstation",
+          "ruta": "images/icons/icon_workstation.png",
+          "sujeto": "Desktop monitor + tower",
+          "tags": [
+            "workstation",
+            "computer",
+            "monitor",
+            "hardware",
+            "IT"
+          ],
+          "resolucion_px": {
+            "ancho": 350,
+            "alto": 315
+          },
+          "aspect_ratio": 1.111,
+          "content_bbox_px": [
+            10,
+            11,
+            337,
+            304
+          ],
+          "uso_recomendado": [
+            "Infraestructura",
+            "Desktop / IT",
+            "Hardware"
+          ]
+        },
+        {
+          "id": "icon_money_pin",
+          "ruta": "images/icons/icon_money_pin.png",
+          "sujeto": "Map pin with dollar sign",
+          "tags": [
+            "money",
+            "location",
+            "finance",
+            "price",
+            "pin"
+          ],
+          "resolucion_px": {
+            "ancho": 291,
+            "alto": 337
+          },
+          "aspect_ratio": 0.864,
+          "content_bbox_px": [
+            14,
+            2,
+            276,
+            327
+          ],
+          "uso_recomendado": [
+            "Precio / ubicación",
+            "Finanzas locales",
+            "Budget geo"
+          ]
+        },
+        {
+          "id": "icon_calculator",
+          "ruta": "images/icons/icon_calculator.png",
+          "sujeto": "Calculator",
+          "tags": [
+            "calculator",
+            "math",
+            "finance",
+            "numbers"
+          ],
+          "resolucion_px": {
+            "ancho": 291,
+            "alto": 337
+          },
+          "aspect_ratio": 0.864,
+          "content_bbox_px": [
+            30,
+            5,
+            260,
+            333
+          ],
+          "uso_recomendado": [
+            "Cálculo",
+            "Finanzas",
+            "Métricas"
+          ]
+        },
+        {
+          "id": "icon_smartwatch",
+          "ruta": "images/icons/icon_smartwatch.png",
+          "sujeto": "Smartwatch / wearable",
+          "tags": [
+            "smartwatch",
+            "wearable",
+            "device",
+            "time"
+          ],
+          "resolucion_px": {
+            "ancho": 291,
+            "alto": 337
+          },
+          "aspect_ratio": 0.864,
+          "content_bbox_px": [
+            48,
+            2,
+            261,
+            331
+          ],
+          "uso_recomendado": [
+            "Wearables",
+            "Dispositivos",
+            "IoT"
+          ]
+        },
+        {
+          "id": "icon_users",
+          "ruta": "images/icons/icon_users.png",
+          "sujeto": "Two people / team",
+          "tags": [
+            "users",
+            "team",
+            "people",
+            "community"
+          ],
+          "resolucion_px": {
+            "ancho": 291,
+            "alto": 337
+          },
+          "aspect_ratio": 0.864,
+          "content_bbox_px": [
+            13,
+            21,
+            275,
+            316
+          ],
+          "uso_recomendado": [
+            "Equipo",
+            "Usuarios múltiples",
+            "Comunidad"
+          ]
+        },
+        {
+          "id": "icon_umbrella",
+          "ruta": "images/icons/icon_umbrella.png",
+          "sujeto": "Umbrella",
+          "tags": [
+            "umbrella",
+            "protection",
+            "coverage",
+            "insurance"
+          ],
+          "resolucion_px": {
+            "ancho": 301,
+            "alto": 336
+          },
+          "aspect_ratio": 0.896,
+          "content_bbox_px": [
+            5,
+            22,
+            298,
+            317
+          ],
+          "uso_recomendado": [
+            "Cobertura",
+            "Protección",
+            "Seguros"
+          ]
+        },
+        {
+          "id": "icon_lock",
+          "ruta": "images/icons/icon_lock.png",
+          "sujeto": "Padlock",
+          "tags": [
+            "lock",
+            "security",
+            "privacy",
+            "auth"
+          ],
+          "resolucion_px": {
+            "ancho": 301,
+            "alto": 336
+          },
+          "aspect_ratio": 0.896,
+          "content_bbox_px": [
+            38,
+            5,
+            268,
+            334
+          ],
+          "uso_recomendado": [
+            "Seguridad",
+            "Privacidad",
+            "Auth"
+          ]
+        },
+        {
+          "id": "icon_sun",
+          "ruta": "images/icons/icon_sun.png",
+          "sujeto": "Sun with rays",
+          "tags": [
+            "sun",
+            "brightness",
+            "light",
+            "day"
+          ],
+          "resolucion_px": {
+            "ancho": 339,
+            "alto": 336
+          },
+          "aspect_ratio": 1.009,
+          "content_bbox_px": [
+            3,
+            1,
+            330,
+            328
+          ],
+          "uso_recomendado": [
+            "Claridad",
+            "Energía",
+            "Modo claro"
+          ]
+        },
+        {
+          "id": "icon_cart_add",
+          "ruta": "images/icons/icon_cart_add.png",
+          "sujeto": "Shopping cart with plus",
+          "tags": [
+            "cart",
+            "shopping",
+            "ecommerce",
+            "add"
+          ],
+          "resolucion_px": {
+            "ancho": 329,
+            "alto": 335
+          },
+          "aspect_ratio": 0.982,
+          "content_bbox_px": [
+            10,
+            18,
+            306,
+            311
+          ],
+          "uso_recomendado": [
+            "Add to cart",
+            "Ecommerce",
+            "Compras"
+          ]
+        },
+        {
+          "id": "icon_volume",
+          "ruta": "images/icons/icon_volume.png",
+          "sujeto": "Speaker with sound waves",
+          "tags": [
+            "volume",
+            "speaker",
+            "audio",
+            "sound"
+          ],
+          "resolucion_px": {
+            "ancho": 333,
+            "alto": 287
+          },
+          "aspect_ratio": 1.16,
+          "content_bbox_px": [
+            9,
+            5,
+            321,
+            267
+          ],
+          "uso_recomendado": [
+            "Audio",
+            "Volumen",
+            "Notificaciones sonoras"
+          ]
+        },
+        {
+          "id": "icon_shield_check",
+          "ruta": "images/icons/icon_shield_check.png",
+          "sujeto": "Shield with checkmark",
+          "tags": [
+            "shield",
+            "verified",
+            "security",
+            "trust"
+          ],
+          "resolucion_px": {
+            "ancho": 313,
+            "alto": 343
+          },
+          "aspect_ratio": 0.913,
+          "content_bbox_px": [
+            25,
+            7,
+            289,
+            337
+          ],
+          "uso_recomendado": [
+            "Verificado",
+            "Trust",
+            "Seguridad OK"
+          ]
+        },
+        {
+          "id": "icon_media_gallery",
+          "ruta": "images/icons/icon_media_gallery.png",
+          "sujeto": "Stacked frames / gallery focus",
+          "tags": [
+            "media",
+            "gallery",
+            "camera",
+            "layers"
+          ],
+          "resolucion_px": {
+            "ancho": 349,
+            "alto": 253
+          },
+          "aspect_ratio": 1.379,
+          "content_bbox_px": [
+            8,
+            9,
+            335,
+            240
+          ],
+          "uso_recomendado": [
+            "Galería",
+            "Media",
+            "Captura"
+          ]
+        },
+        {
+          "id": "icon_card_reader",
+          "ruta": "images/icons/icon_card_reader.png",
+          "sujeto": "Card reader / ATM insert",
+          "tags": [
+            "card",
+            "payment",
+            "atm",
+            "reader"
+          ],
+          "resolucion_px": {
+            "ancho": 329,
+            "alto": 303
+          },
+          "aspect_ratio": 1.086,
+          "content_bbox_px": [
+            13,
+            11,
+            308,
+            298
+          ],
+          "uso_recomendado": [
+            "Pagos",
+            "ATM",
+            "Medios de pago"
+          ]
+        },
+        {
+          "id": "icon_mail",
+          "ruta": "images/icons/icon_mail.png",
+          "sujeto": "Envelope / email",
+          "tags": [
+            "mail",
+            "email",
+            "message",
+            "contact"
+          ],
+          "resolucion_px": {
+            "ancho": 352,
+            "alto": 274
+          },
+          "aspect_ratio": 1.285,
+          "content_bbox_px": [
+            11,
+            19,
+            340,
+            264
+          ],
+          "uso_recomendado": [
+            "Email",
+            "Mensajes",
+            "Contacto"
+          ]
+        },
+        {
+          "id": "icon_file_add",
+          "ruta": "images/icons/icon_file_add.png",
+          "sujeto": "Document with plus",
+          "tags": [
+            "file",
+            "document",
+            "add",
+            "new"
+          ],
+          "resolucion_px": {
+            "ancho": 284,
+            "alto": 316
+          },
+          "aspect_ratio": 0.899,
+          "content_bbox_px": [
+            11,
+            4,
+            275,
+            300
+          ],
+          "uso_recomendado": [
+            "Nuevo archivo",
+            "Crear doc",
+            "Upload"
+          ]
+        },
+        {
+          "id": "icon_lightbulb",
+          "ruta": "images/icons/icon_lightbulb.png",
+          "sujeto": "Light bulb / idea",
+          "tags": [
+            "idea",
+            "innovation",
+            "tip",
+            "insight"
+          ],
+          "resolucion_px": {
+            "ancho": 284,
+            "alto": 316
+          },
+          "aspect_ratio": 0.899,
+          "content_bbox_px": [
+            43,
+            8,
+            240,
+            302
+          ],
+          "uso_recomendado": [
+            "Ideas",
+            "Innovación",
+            "Tips"
+          ]
+        },
+        {
+          "id": "icon_database",
+          "ruta": "images/icons/icon_database.png",
+          "sujeto": "Stacked disks / database",
+          "tags": [
+            "database",
+            "stack",
+            "data",
+            "storage"
+          ],
+          "resolucion_px": {
+            "ancho": 311,
+            "alto": 312
+          },
+          "aspect_ratio": 0.997,
+          "content_bbox_px": [
+            7,
+            12,
+            303,
+            306
+          ],
+          "uso_recomendado": [
+            "Base de datos",
+            "Capas de datos",
+            "Storage"
+          ]
+        },
+        {
+          "id": "icon_fingerprint",
+          "ruta": "images/icons/icon_fingerprint.png",
+          "sujeto": "Fingerprint in viewfinder",
+          "tags": [
+            "fingerprint",
+            "biometric",
+            "security",
+            "identity"
+          ],
+          "resolucion_px": {
+            "ancho": 341,
+            "alto": 330
+          },
+          "aspect_ratio": 1.033,
+          "content_bbox_px": [
+            15,
+            3,
+            326,
+            330
+          ],
+          "uso_recomendado": [
+            "Biometría",
+            "Identidad",
+            "Auth avanzada"
+          ]
+        },
+        {
+          "id": "icon_invoice",
+          "ruta": "images/icons/icon_invoice.png",
+          "sujeto": "Document stack with dollar",
+          "tags": [
+            "invoice",
+            "billing",
+            "finance",
+            "documents"
+          ],
+          "resolucion_px": {
+            "ancho": 300,
+            "alto": 365
+          },
+          "aspect_ratio": 0.822,
+          "content_bbox_px": [
+            14,
+            17,
+            278,
+            365
+          ],
+          "uso_recomendado": [
+            "Facturación",
+            "Billing",
+            "Docs financieros"
+          ]
+        },
+        {
+          "id": "icon_home",
+          "ruta": "images/icons/icon_home.png",
+          "sujeto": "House / home",
+          "tags": [
+            "home",
+            "house",
+            "start",
+            "main"
+          ],
+          "resolucion_px": {
+            "ancho": 300,
+            "alto": 319
+          },
+          "aspect_ratio": 0.94,
+          "content_bbox_px": [
+            21,
+            11,
+            285,
+            305
+          ],
+          "uso_recomendado": [
+            "Inicio",
+            "Home",
+            "Base"
+          ]
+        },
+        {
+          "id": "icon_sprout",
+          "ruta": "images/icons/icon_sprout.png",
+          "sujeto": "Sprout / growth",
+          "tags": [
+            "sprout",
+            "growth",
+            "nature",
+            "plant"
+          ],
+          "resolucion_px": {
+            "ancho": 300,
+            "alto": 319
+          },
+          "aspect_ratio": 0.94,
+          "content_bbox_px": [
+            3,
+            16,
+            297,
+            310
+          ],
+          "uso_recomendado": [
+            "Crecimiento",
+            "ESG",
+            "Naturaleza"
+          ]
+        },
+        {
+          "id": "icon_printer",
+          "ruta": "images/icons/icon_printer.png",
+          "sujeto": "Printer",
+          "tags": [
+            "printer",
+            "print",
+            "output",
+            "device"
+          ],
+          "resolucion_px": {
+            "ancho": 348,
+            "alto": 278
+          },
+          "aspect_ratio": 1.252,
+          "content_bbox_px": [
+            7,
+            8,
+            336,
+            270
+          ],
+          "uso_recomendado": [
+            "Impresión",
+            "Output",
+            "Dispositivos"
+          ]
+        },
+        {
+          "id": "icon_globe",
+          "ruta": "images/icons/icon_globe.png",
+          "sujeto": "Globe on stand",
+          "tags": [
+            "globe",
+            "world",
+            "global",
+            "geography"
+          ],
+          "resolucion_px": {
+            "ancho": 304,
+            "alto": 346
+          },
+          "aspect_ratio": 0.879,
+          "content_bbox_px": [
+            17,
+            11,
+            295,
+            340
+          ],
+          "uso_recomendado": [
+            "Global",
+            "Mundial",
+            "Alcance"
+          ]
+        }
+      ]
+    }
+  },
+  "separadores": {
+    "descripcion": "Slides de separación entre secciones. Fondo de color sólido de la paleta marca. Sin imágenes de fondo. El color se elige según la sección o el tono del contenido que le sigue.",
+    "estructura": {
+      "fondo": "Color sólido de la paleta marca (ver opciones abajo)",
+      "sin_numero_pagina": true,
+      "elementos_opcionales": [
+        "Título de la sección centrado o alineado a la izquierda",
+        "Kicker o número de sección"
+      ],
+      "color_texto_sobre_claro": "#2C2A29",
+      "color_texto_sobre_oscuro": "#F7F7F7"
+    },
+    "variantes": {
+      "descripcion": "Cinco composiciones sobre el mismo fondo de color. Elegir una y mantenerla en todo el deck: la variedad va en el color, no en la composición.",
+      "plano": {
+        "titulo": { "x": 0.7, "y": 2.5, "w": 12.0, "h": 2.0, "size": 40, "align": "center", "valign": "middle" },
+        "uso": "Default. Decks cortos (menos de 15 slides)."
+      },
+      "numerado": {
+        "numero": { "x": 0.9, "y": 2.0, "w": 3.0, "h": 1.6, "size": 84, "fuente": "CIBFont Numerals" },
+        "titulo": { "x": 0.9, "y": 3.8, "w": 10.0, "h": 1.2, "size": 36, "align": "left" },
+        "uso": "Cuando la agenda está numerada y conviene amarrar el separador al índice."
+      },
+      "con_subtitulo": {
+        "titulo": { "x": 0.9, "y": 2.6, "w": 11.0, "h": 1.2, "size": 40, "align": "left" },
+        "subtitulo": { "x": 0.9, "y": 3.9, "w": 9.0, "h": 0.8, "size": 18, "italic": true },
+        "linea_acento": { "x": 0.9, "y": 3.7, "w": 2.6, "color": "negro o blanco según el fondo" },
+        "uso": "Anticipar en una línea qué se va a cubrir en la sección."
+      },
+      "con_progreso": {
+        "titulo": { "x": 0.9, "y": 2.6, "w": 11.0, "h": 1.4, "size": 40, "align": "left" },
+        "progreso": { "componente": "barra_progreso", "x": 0.9, "y": 6.2, "w": 11.53, "formato": "3 / 6" },
+        "uso": "Decks largos: orienta a la audiencia sobre cuánto falta."
+      },
+      "split_color": {
+        "banda": { "x": 0, "y": 0, "w": 4.4, "h": 7.5, "fill": "negro" },
+        "titulo": { "x": 5.0, "y": 2.9, "w": 7.6, "h": 1.6, "size": 38, "align": "left" },
+        "uso": "Transición fuerte entre bloques de tono distinto (ej. de teoría a demo)."
+      }
+    },
+    "rotacion_sugerida": {
+      "descripcion": "Orden recomendado al usar varios separadores en un mismo deck: evita repetir color en secciones consecutivas y reserva el negro para el cierre.",
+      "orden": ["azul", "amarillo", "verde", "naranja", "rosado"],
+      "negro": "Reservado para la última sección o para el bloque de cierre."
+    },
+    "opciones": [
+      {
+        "id": "separador_amarillo",
+        "color_nombre": "amarillo",
+        "hex": "#FFD204",
+        "color_texto": "#2C2A29",
+        "como_usar_en_pptx": {
+          "slide.background": {
+            "color": "FFD204"
+          }
+        }
+      },
+      {
+        "id": "separador_verde",
+        "color_nombre": "verde",
+        "hex": "#00C587",
+        "color_texto": "#2C2A29",
+        "como_usar_en_pptx": {
+          "slide.background": {
+            "color": "00C587"
+          }
+        }
+      },
+      {
+        "id": "separador_naranja",
+        "color_nombre": "naranja",
+        "hex": "#FF803A",
+        "color_texto": "#2C2A29",
+        "como_usar_en_pptx": {
+          "slide.background": {
+            "color": "FF803A"
+          }
+        }
+      },
+      {
+        "id": "separador_rosado",
+        "color_nombre": "rosado",
+        "hex": "#FFB8D2",
+        "color_texto": "#2C2A29",
+        "como_usar_en_pptx": {
+          "slide.background": {
+            "color": "FFB8D2"
+          }
+        }
+      },
+      {
+        "id": "separador_azul",
+        "color_nombre": "azul",
+        "hex": "#01CDEB",
+        "color_texto": "#2C2A29",
+        "como_usar_en_pptx": {
+          "slide.background": {
+            "color": "01CDEB"
+          }
+        }
+      },
+      {
+        "id": "separador_negro",
+        "color_nombre": "negro",
+        "hex": "#2C2A29",
+        "color_texto": "#F7F7F7",
+        "como_usar_en_pptx": {
+          "slide.background": {
+            "color": "2C2A29"
+          }
+        }
+      }
+    ],
+    "ejemplo_uso_pptx": {
+      "descripcion": "Código de referencia para generar un separador en index.ts",
+      "codigo": "const s = pres.addSlide(); s.background = { color: 'FFD204' }; s.addText('Nombre de sección', { x: 0.7, y: 3.0, w: 12.0, h: 1.5, fontFace: 'CIBFont Sans', fontSize: 40, bold: true, color: '2C2A29', align: 'center', valign: 'middle' });"
+    }
+  },
+  "accesibilidad": {
+    "descripcion": "Contrastes medidos con la fórmula WCAG 2.1. Explica por qué la regla 'los cuerpos de texto van en blanco o negro' no es estética sino técnica: ningún color de marca alcanza contraste de texto sobre fondo claro.",
+    "umbrales": {
+      "texto_normal": 4.5,
+      "texto_grande": 3.0,
+      "nota": "Texto grande = 24 pt o más, o 19 pt en Bold."
+    },
+    "matriz_contraste": {
+      "sobre_fondo_blanco_FFFFFF": {
+        "negro_2C2A29": { "ratio": 14.28, "veredicto": "texto_ok" },
+        "gris_texto_suave_6B6967": { "ratio": 5.47, "veredicto": "texto_ok" },
+        "gris_medio_8A8886": { "ratio": 3.53, "veredicto": "solo_texto_grande" },
+        "naranja_FF803A": { "ratio": 2.5, "veredicto": "no_para_texto" },
+        "verde_00C587": { "ratio": 2.25, "veredicto": "no_para_texto" },
+        "azul_01CDEB": { "ratio": 1.92, "veredicto": "no_para_texto" },
+        "rosado_FFB8D2": { "ratio": 1.61, "veredicto": "no_para_texto" },
+        "amarillo_FFD204": { "ratio": 1.45, "veredicto": "no_para_texto" }
+      },
+      "sobre_fondo_gris_claro_F5F5F5": {
+        "negro_2C2A29": { "ratio": 13.1, "veredicto": "texto_ok" },
+        "gris_texto_suave_6B6967": { "ratio": 5.01, "veredicto": "texto_ok" },
+        "gris_medio_8A8886": { "ratio": 3.24, "veredicto": "solo_texto_grande" },
+        "acentos_de_marca": { "ratio": "1.33 – 2.29", "veredicto": "no_para_texto" }
+      },
+      "sobre_fondo_oscuro_2A2A29": {
+        "blanco_F7F7F7": { "ratio": 13.41, "veredicto": "texto_ok" },
+        "amarillo_FFD204": { "ratio": 9.9, "veredicto": "texto_ok" },
+        "gris_claro_D8D6D4": { "ratio": 9.91, "veredicto": "texto_ok" },
+        "rosado_FFB8D2": { "ratio": 8.92, "veredicto": "texto_ok" },
+        "azul_01CDEB": { "ratio": 7.48, "veredicto": "texto_ok" },
+        "verde_00C587": { "ratio": 6.39, "veredicto": "texto_ok" },
+        "naranja_FF803A": { "ratio": 5.75, "veredicto": "texto_ok" },
+        "gris_texto_suave_6B6967": { "ratio": 2.63, "veredicto": "no_para_texto" },
+        "gris_medio_8A8886": { "ratio": 4.07, "veredicto": "solo_texto_grande" }
+      },
+      "sobre_tarjeta_oscura_3A3836": {
+        "blanco_F7F7F7": { "ratio": 10.9, "veredicto": "texto_ok" },
+        "acentos_de_marca": { "ratio": "4.67 – 8.05", "veredicto": "texto_ok" },
+        "gris_texto_suave_6B6967": { "ratio": 2.14, "veredicto": "no_para_texto" }
+      }
+    },
+    "consecuencias_practicas": [
+      "Los acentos de marca solo funcionan como texto SOBRE FONDO OSCURO. Sobre claro son válidos únicamente en formas: iconos, barras, badges, líneas y fills.",
+      "El kicker azul sobre fondo blanco tiene ratio 1.92: es decorativo, no legible. En tema claro el kicker debe ir en negro o en gris_texto_suave, o usar acentos_texto_seguros.",
+      "En tema oscuro NUNCA usar gris_texto_suave (2.63) para cuerpo: usar gris_claro #D8D6D4 o blanco.",
+      "El texto sobre tarjeta oscura #3A3836 pierde algo de contraste frente al fondo #2A2A29; mantener cuerpo en blanco, no en gris."
+    ],
+    "acentos_texto_seguros": {
+      "descripcion": "Variantes oscurecidas de los acentos de marca que SÍ alcanzan 4.5:1 sobre fondo blanco, para cuando se necesita texto en color en tema claro (kickers, énfasis en línea).",
+      "requiere_validacion_marca": true,
+      "valores": {
+        "azul_texto": { "hex": "#017F92", "ratio_sobre_blanco": 4.72, "origen": "azul #01CDEB oscurecido" },
+        "verde_texto": { "hex": "#00865C", "ratio_sobre_blanco": 4.6, "origen": "verde #00C587 oscurecido" },
+        "naranja_texto": { "hex": "#CF4900", "ratio_sobre_blanco": 4.56, "origen": "naranja #FF803A oscurecido" },
+        "amarillo_texto": { "hex": "#8C7300", "ratio_sobre_blanco": 4.6, "origen": "amarillo #FFD204 oscurecido" },
+        "rosado_texto": { "hex": "#E40054", "ratio_sobre_blanco": 4.74, "origen": "rosado #FFB8D2 oscurecido" }
+      },
+      "nota": "Estos hex no están aprobados por marca: son la corrección matemática mínima. Mientras no se validen, preferir negro o gris para texto en tema claro."
+    }
+  },
+  "densidad": {
+    "descripcion": "Topes de cantidad por slide. Existen para que la decisión ante contenido que no cabe sea 'partir el slide', no 'encoger todo'.",
+    "por_slide": {
+      "max_ideas": 1,
+      "max_tarjetas": 6,
+      "max_tarjetas_por_fila": 4,
+      "max_items_lista": 5,
+      "max_metricas": 4,
+      "max_hitos_timeline": 6,
+      "max_columnas_tabla": 5,
+      "max_filas_tabla": 8,
+      "max_graficos": 1,
+      "max_iconos": 6,
+      "max_palabras_aprox": 90
+    },
+    "por_deck": {
+      "slides_por_minuto": 0.7,
+      "nota_duracion": "Regla práctica: una sesión de 20 minutos son 12 a 14 slides contando portada, separadores y cierre.",
+      "separadores_max": 5,
+      "nota_separadores": "Más de 5 separadores en un deck de 20 minutos fragmenta la narrativa."
+    },
+    "que_hacer_al_exceder": [
+      "Dividir en dos slides con títulos que enuncien conclusiones distintas.",
+      "Mover el detalle a las notas del orador.",
+      "Resumir en un slide de takeaways y dejar la tabla completa como anexo."
+    ]
+  },
+  "graficos": {
+    "descripcion": "Visualización de datos. Usa exclusivamente paleta.tablas_y_graficos: los colores de marca no entran en gráficos.",
+    "metodo_pptx": "slide.addChart(pres.ChartType.<tipo>, data, opts)",
+    "tipos_permitidos": {
+      "bar": "Comparar categorías. Default para la mayoría de casos.",
+      "line": "Evolución en el tiempo. Máximo 4 series.",
+      "pie": "Solo con 2 o 3 partes de un total. Con más, usar bar.",
+      "doughnut": "Igual que pie; preferido cuando se quiere una cifra al centro.",
+      "scatter": "Correlación entre dos variables.",
+      "area": "Volumen acumulado; evitar apilar más de 3 series."
+    },
+    "tipos_a_evitar": [
+      "3D en cualquier variante: distorsiona la lectura.",
+      "Radar y funnel: baja legibilidad a distancia de proyección.",
+      "Ejes secundarios: si hacen falta, son dos gráficos."
+    ],
+    "estilo": {
+      "orden_de_series": "Usar paleta.tablas_y_graficos en el orden declarado; intensidad media por defecto, oscura para resaltar una serie y clara para el resto.",
+      "color_eje": "#D8D6D4",
+      "color_etiqueta_eje": "#6B6967",
+      "size_etiqueta_eje": 11,
+      "gridlines": { "mostrar": "solo horizontales", "color": "#E4E2E0", "grosor": 1 },
+      "leyenda": { "posicion": "bottom", "size": 11, "ocultar_si_serie_unica": true },
+      "etiquetas_de_datos": {
+        "mostrar": "solo cuando hay 6 valores o menos",
+        "size": 11,
+        "color": "#2C2A29",
+        "nota": "Con etiquetas de datos visibles, quitar el eje Y para no duplicar información."
+      },
+      "borde_grafico": "none",
+      "fondo_grafico": "transparente"
+    },
+    "reglas": [
+      "El título del slide enuncia la conclusión del gráfico, no su tipo ('El 70% se concentra en dos canales', no 'Distribución por canal').",
+      "Un gráfico por slide, con una lectura en texto al costado.",
+      "Eje Y desde cero en gráficos de barras.",
+      "Nota de fuente obligatoria (componente nota_al_pie) cuando el dato es de terceros.",
+      "En tema oscuro: invertir etiquetas a blanco y gridlines a #3A3836; las series conservan la paleta de datos."
+    ],
+    "tabla_o_grafico": {
+      "usar_tabla": "Valores exactos importan, hay varias dimensiones o el público va a comparar celdas.",
+      "usar_grafico": "Importa la forma, la tendencia o la proporción, no el valor exacto.",
+      "usar_kpi": "Hay una sola cifra que sostiene el argumento."
+    }
+  },
+  "reglas_de_diseno": [
+    "Los textos de cuerpo siempre van en blanco o negro. Nunca en colores de la paleta marca.",
+    "Menos es más: diseño minimalista, sin sobrecarga visual.",
+    "El kicker siempre va en mayúsculas con letter-spacing amplio.",
+    "Las tarjetas sobre fondo blanco llevan sombra suave; las de fondo oscuro, sin sombra.",
+    "Usar color de acento en el borde izquierdo de tarjetas para identificar categorías.",
+    "La numeración de página va en la esquina inferior derecha, formato 01, 02…",
+    "Slides de portada y cierre no llevan número de página.",
+    "Los íconos circulares se usan para listas y pasos; los badges circulares llevan número.",
+    "Los iconos del catálogo (images/icons) deben ser coherentes con la intención de comunicación. Si el significado no es preciso, mejor no usar icono.",
+    "No usar fondos en tablas. Paleta de tablas es independiente a la paleta marca.",
+    "CIBFont Numerals solo se usa para cifras cortas y destacadas, nunca como cuerpo de texto.",
+    "Posicionar con reticula: no inventar coordenadas por presentación. Si un layout no cabe en la retícula, agregar el arquetipo a tipos_de_slide en vez de improvisarlo en un documento.",
+    "Elegir el fondo por la estructura del contenido, no por el color: los fondos rail exigen columna izquierda con poco contenido y los split exigen una idea por panel.",
+    "Los acentos de marca sobre fondo claro solo van en formas (iconos, barras, badges, líneas), nunca como texto: ver accesibilidad.matriz_contraste.",
+    "En tema oscuro las tarjetas no llevan sombra y el cuerpo va en blanco o gris_claro, nunca en gris_texto_suave.",
+    "Un mensaje por slide. Al exceder los topes de densidad se parte el slide; no se reduce la fuente por debajo de 12 pt."
+  ]
+}

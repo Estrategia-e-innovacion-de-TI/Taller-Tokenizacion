@@ -63,7 +63,7 @@ export function AccountingPanel({ balances }: Props) {
         />
 
         <div className="mt-8 grid gap-8 md:grid-cols-2 md:items-start md:gap-10">
-          <div className="min-w-0 border border-negro/10 bg-blanco p-5 md:p-6">
+          <div className="card min-w-0">
             <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
               Tu posición
             </p>
@@ -113,7 +113,7 @@ export function AccountingPanel({ balances }: Props) {
             </div>
           </div>
 
-          <div className="min-w-0 border border-negro/10 bg-blanco p-5 md:p-6">
+          <div className="card min-w-0">
             <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
               Protocolo
             </p>
