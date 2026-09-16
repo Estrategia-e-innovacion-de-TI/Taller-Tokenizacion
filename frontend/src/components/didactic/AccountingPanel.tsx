@@ -20,13 +20,13 @@ function Row({
   hint?: string;
 }) {
   return (
-    <div className="grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-0.5 border-b border-negro/10 py-2.5 last:border-b-0">
-      <p className="text-sm text-negro/70">{label}</p>
-      <p className="text-right font-mono text-sm font-semibold text-negro">
+    <div className="row-line">
+      <p className="text-sm text-muted">{label}</p>
+      <p className="text-right font-mono text-sm font-bold text-negro">
         {value}
       </p>
       {hint ? (
-        <p className="col-span-2 text-xs text-negro/40">{hint}</p>
+        <p className="col-span-2 text-xs text-subtle">{hint}</p>
       ) : null}
     </div>
   );
@@ -64,9 +64,7 @@ export function AccountingPanel({ balances }: Props) {
 
         <div className="mt-8 grid gap-8 md:grid-cols-2 md:items-start md:gap-10">
           <div className="card min-w-0">
-            <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
-              Tu posición
-            </p>
+            <p className="eyebrow">Tu posición</p>
             {auth.isConnected && auth.smartAccountAddress ? (
               <p className="mt-1 font-mono text-xs text-negro/50">
                 <a
@@ -114,9 +112,7 @@ export function AccountingPanel({ balances }: Props) {
           </div>
 
           <div className="card min-w-0">
-            <p className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
-              Protocolo
-            </p>
+            <p className="eyebrow">Protocolo</p>
             <p className="mt-1 text-xs text-negro/45">
               Libro mayor del caso RENT (views públicas).
             </p>
@@ -146,18 +142,18 @@ export function AccountingPanel({ balances }: Props) {
                 hint="Destino del COPW en PropertySale.buy · primario"
               />
               {balances.treasury ? (
-                <div className="border-b border-negro/10 py-2.5 last:border-b-0">
-                  <p className="text-sm text-negro/70">Address treasury</p>
+                <div className="row-line">
+                  <p className="text-sm text-muted">Address treasury</p>
                   <a
                     href={sepoliaAddressUrl(balances.treasury)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="link-accent mt-1 inline-block break-all font-mono text-xs"
+                    className="link-accent font-mono text-xs"
                     title={balances.treasury}
                   >
                     {truncateAddress(balances.treasury, 6)}
                   </a>
-                  <p className="mt-0.5 text-xs text-negro/40">
+                  <p className="col-span-2 text-xs text-subtle">
                     Ver saldo COPW en Etherscan
                   </p>
                 </div>

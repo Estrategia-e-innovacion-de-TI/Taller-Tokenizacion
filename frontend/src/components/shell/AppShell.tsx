@@ -6,10 +6,10 @@ import { formatCopLabel, truncateAddress } from "../../lib/format-cop";
 import { sepoliaAddressUrl } from "../../lib/viem";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `text-sm font-semibold tracking-wide transition-colors ${
+  `border-b-2 px-2 py-1.5 text-sm font-bold tracking-wide transition-colors ${
     isActive
-      ? "text-negro underline decoration-amarillo decoration-2 underline-offset-4"
-      : "text-muted hover:text-negro"
+      ? "border-amarillo text-negro"
+      : "border-transparent text-muted hover:text-negro"
   }`;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -17,13 +17,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const balances = useBalances();
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-borde bg-tarjeta/90 backdrop-blur-md">
-        <div className="container-app flex flex-wrap items-center justify-between gap-4 py-4">
-          <Link to="/" className="font-display text-lg font-extrabold tracking-tight">
-            Taller <span className="text-naranja">RENT</span>
+    <div className="flex min-h-screen flex-col">
+      <header className="border-b border-borde bg-tarjeta/95 backdrop-blur-md">
+        <div className="container-app flex flex-wrap items-center justify-between gap-4 py-3.5">
+          <Link to="/" className="flex items-center gap-3 font-display text-lg font-extrabold tracking-tight">
+            <span className="h-8 w-1 bg-amarillo" aria-hidden />
+            Taller RENT
           </Link>
-          <nav className="flex flex-wrap gap-5">
+          <nav className="flex flex-wrap items-center gap-1">
             <NavLink to="/demo" className={linkClass}>
               Demo
             </NavLink>
@@ -32,15 +33,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             </NavLink>
           </nav>
         </div>
-        <div className="border-t border-borde bg-zebra/80">
-          <div className="container-app flex flex-wrap items-center gap-x-5 gap-y-2 py-2.5 text-xs">
+        <div className="border-t border-borde bg-zebra/90">
+          <div className="container-app flex flex-wrap items-center gap-x-4 gap-y-2 py-2 text-xs">
             <span
-              className={`chip ${
+              className={`chip normal-case tracking-normal ${
                 auth.mode === "email"
                   ? "bg-verde-100"
                   : auth.mode === "wallet"
                     ? "bg-naranja-100"
-                    : "bg-tarjeta border border-borde"
+                    : "border border-borde bg-tarjeta"
               }`}
             >
               {auth.mode === "email"
@@ -49,14 +50,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                   ? "MetaMask · pagas gas"
                   : "Gas: email patrocinado · MetaMask no"}
             </span>
-            <span className="chip border border-borde bg-tarjeta text-muted">Sepolia</span>
+            <span className="chip border border-borde bg-tarjeta normal-case tracking-normal text-muted">
+              Sepolia
+            </span>
             {auth.isConnected ? (
               <>
                 <span className="text-subtle">
                   {auth.mode === "email" ? "Cuenta email" : "Cuenta"}
                 </span>
                 <a
-                  className="font-mono text-negro underline decoration-borde underline-offset-2 hover:decoration-azul"
+                  className="font-mono text-negro underline decoration-borde underline-offset-2 hover:decoration-amarillo"
                   href={sepoliaAddressUrl(auth.smartAccountAddress!)}
                   target="_blank"
                   rel="noreferrer"
@@ -64,8 +67,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 >
                   {truncateAddress(auth.smartAccountAddress!, 6)}
                 </a>
-                <span className="font-semibold">COPW {formatCopLabel(balances.copw)}</span>
-                <span className="font-semibold">RENT {balances.rent.toString()}</span>
+                <span className="font-bold">COPW {formatCopLabel(balances.copw)}</span>
+                <span className="font-bold">RENT {balances.rent.toString()}</span>
                 <button type="button" onClick={auth.disconnect} className="btn-secondary !px-3 !py-1 text-xs">
                   Salir
                 </button>
@@ -76,8 +79,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main>{children}</main>
-      <footer className="border-t border-borde py-8 text-center text-xs text-subtle">
+      <main className="flex-1">{children}</main>
+      <footer className="border-t border-borde py-6 text-center text-[10px] tracking-wide text-folio uppercase">
         Demo educativa en testnet. No es oferta pública ni producto autorizado por la SFC.
       </footer>
     </div>

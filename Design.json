@@ -6,8 +6,8 @@
     {
       "version": "1.1.1",
       "cambios": [
-        "Tonalidades Bancolombia a–f (100 / 200 / 500) en paleta.tonalidades.",
-        "Escala de border-radius (tokens 0–7 y full) con valores en px e in para pptxgenjs."
+        "Seis arquetipos sin grid de tarjetas: comando_hero, toolchain_strip, manifiesto, doc_mapa, dos_columnas_asimetrica, checklist_vertical.",
+        "Regla de rotación de layouts: máximo 1 de cada 3 slides con grid de tarjetas; preferir frase, flujo, código y lista."
       ]
     },
     {
@@ -106,77 +106,6 @@
         "panel_derecho": { "x": 7.1, "w": 5.53 }
       }
     }
-  },
-  "bordes": {
-    "descripcion": "Escala de border-radius con tokens reutilizables. No inventar valores fuera de esta escala. pptxgenjs usa rectRadius en pulgadas (in = px / 96).",
-    "unidad_origen": "px",
-    "unidad_pptx": "in",
-    "dpi": 96,
-    "uso_en_codigo": "design.bordes.escala['3'].in para cards; design.bordes.escala.full.in_formula para pills/avatares (min(w,h)/2).",
-    "escala": {
-      "0": {
-        "token": "border-radius-0",
-        "px": 0,
-        "in": 0,
-        "uso": "Headers fijos, full width"
-      },
-      "1": {
-        "token": "border-radius-1",
-        "px": 4,
-        "in": 0.0417,
-        "uso": "Chips, tags, pequeños badges"
-      },
-      "2": {
-        "token": "border-radius-2",
-        "px": 8,
-        "in": 0.0833,
-        "uso": "Inputs, overlays"
-      },
-      "3": {
-        "token": "border-radius-3",
-        "px": 16,
-        "in": 0.1667,
-        "uso": "Cards, contenedores base"
-      },
-      "4": {
-        "token": "border-radius-4",
-        "px": 24,
-        "in": 0.25,
-        "uso": "Secciones destacadas"
-      },
-      "5": {
-        "token": "border-radius-5",
-        "px": 32,
-        "in": 0.3333,
-        "uso": "Contenedores amplios"
-      },
-      "6": {
-        "token": "border-radius-6",
-        "px": 48,
-        "in": 0.5,
-        "uso": "Avatares grandes, hero visuals"
-      },
-      "7": {
-        "token": "border-radius-7",
-        "px": 64,
-        "in": 0.6667,
-        "uso": "Headers gráficos, promos"
-      },
-      "full": {
-        "token": "border-radius-full",
-        "px": 999,
-        "in": null,
-        "in_formula": "Math.min(w, h) / 2",
-        "uso": "Avatares circulares, íconos, botones, pills"
-      }
-    },
-    "recomendaciones": [
-      "Usa radios coherentes con el padding interno.",
-      "Aplica lógica de simetría en componentes repetitivos.",
-      "Usa border-radius-0 cuando el elemento esté al borde de la pantalla (o del lienzo).",
-      "Verifica el comportamiento del radio en distintos breakpoints (o tamaños de slide: wide vs poster).",
-      "Respeta la escala; no inventes nuevos valores."
-    ]
   },
   "temas": {
     "descripcion": "Tokens de color por modo. Un mismo layout se puede renderizar en claro, oscuro o acento sin cambiar geometría: se resuelven los tokens y se pasan al helper. Multiplica el catálogo de slides sin diseñar layouts nuevos.",
@@ -277,48 +206,6 @@
       "borde_tarjeta": {
         "hex": "#E4E2E0",
         "uso": "Bordes de tarjetas en fondo blanco"
-      }
-    },
-    "tonalidades": {
-      "descripcion": "Escala Bancolombia 100 / 200 / 500 por familia (a–f). Complementa paleta.marca: 500 es el acento de familia; 100 y 200 sirven para fondos de sección, chips y barras. El cuerpo de texto sigue siendo negro o blanco.",
-      "uso_en_codigo": "design.paleta.tonalidades.a['500'].hex → strip() para pptxgenjs. No usar 100/200 como color de cuerpo de texto.",
-      "familias": {
-        "a": {
-          "nombre": "amarillo",
-          "100": { "hex": "#FEF4BB", "rgb": "254, 244, 187", "token": "bancolombia.tonalities.a-100" },
-          "200": { "hex": "#FDE773", "rgb": "253, 231, 115", "token": "bancolombia.tonalities.a-200" },
-          "500": { "hex": "#FDDA24", "rgb": "253, 218, 36", "token": "bancolombia.tonalities.a-500" }
-        },
-        "b": {
-          "nombre": "verde",
-          "100": { "hex": "#B0ECDA", "rgb": "176, 236, 218", "token": "bancolombia.tonalities.b-100" },
-          "200": { "hex": "#66DBB8", "rgb": "102, 219, 184", "token": "bancolombia.tonalities.b-200" },
-          "500": { "hex": "#00C389", "rgb": "0, 195, 137", "token": "bancolombia.tonalities.b-500" }
-        },
-        "c": {
-          "nombre": "morado",
-          "100": { "hex": "#DDCFF0", "rgb": "221, 207, 240", "token": "bancolombia.tonalities.c-100" },
-          "200": { "hex": "#C5ADE5", "rgb": "197, 173, 229", "token": "bancolombia.tonalities.c-200" },
-          "500": { "hex": "#9063CD", "rgb": "144, 99, 205", "token": "bancolombia.tonalities.c-500" }
-        },
-        "d": {
-          "nombre": "naranja",
-          "100": { "hex": "#FFD7C4", "rgb": "255, 215, 196", "token": "bancolombia.tonalities.d-100" },
-          "200": { "hex": "#FFB28D", "rgb": "255, 178, 141", "token": "bancolombia.tonalities.d-200" },
-          "500": { "hex": "#FF7F41", "rgb": "255, 127, 65", "token": "bancolombia.tonalities.d-500" }
-        },
-        "e": {
-          "nombre": "rosado",
-          "100": { "hex": "#FCE8F0", "rgb": "252, 232, 240", "token": "bancolombia.tonalities.e-100" },
-          "200": { "hex": "#F9D3E1", "rgb": "249, 211, 225", "token": "bancolombia.tonalities.e-200" },
-          "500": { "hex": "#F5B6CD", "rgb": "245, 182, 205", "token": "bancolombia.tonalities.e-500" }
-        },
-        "f": {
-          "nombre": "azul",
-          "100": { "hex": "#CCEFF8", "rgb": "204, 239, 248", "token": "bancolombia.tonalities.f-100" },
-          "200": { "hex": "#9BE0F1", "rgb": "155, 224, 241", "token": "bancolombia.tonalities.f-200" },
-          "500": { "hex": "#59CBE8", "rgb": "89, 203, 232", "token": "bancolombia.tonalities.f-500" }
-        }
       }
     },
     "tablas_y_graficos": {
@@ -934,7 +821,7 @@
     }
   },
   "tipos_de_slide": {
-    "descripcion": "Plantillas de slides disponibles en el sistema. Cada tipo define su estructura visual.",
+    "descripcion": "Plantillas de slides disponibles en el sistema. Cada tipo define su estructura visual. Preferir rotacion_de_layouts antes de defaultar a grids de tarjetas.",
     "catalogo": [
       {
         "id": "portada",
@@ -1446,8 +1333,177 @@
           "contacto": { "x": 1.0, "y": 6.0, "w": 8, "size": 14 }
         },
         "sin_numero_pagina": true
+      },
+      {
+        "id": "comando_hero",
+        "nombre": "Comando hero",
+        "fondo": "oscuro | claro",
+        "assets_fondo": [
+          "bg_content_solid_dark",
+          "fondo_contenido_negro_franjas_esquina",
+          "bg_content_solid_light"
+        ],
+        "tema": "oscuro | claro",
+        "elementos": [
+          "kicker (herramienta o contexto)",
+          "comando en tipografía display / monoespaciada grande",
+          "una línea de explicación debajo",
+          "nota opcional de flags o precondiciones"
+        ],
+        "geometria": {
+          "kicker": { "x": 0.7, "y": 1.8, "w": 11.93 },
+          "comando": { "x": 0.7, "y": 2.6, "w": 11.93, "size": 40, "fuente": "monoespaciada o CIBFont Sans Bold" },
+          "explicacion": { "x": 0.7, "y": 4.0, "w": 11.93, "size": 18 },
+          "nota": { "x": 0.7, "y": 5.0, "w": 11.93, "size": 14, "componente": "nota_al_pie" }
+        },
+        "nota": "Un solo comando por slide. Sin tarjetas ni bullets. Ideal para forge test, anvil --fork-url, cast call.",
+        "evitar": ["grid de tarjetas", "más de un comando", "sombra"]
+      },
+      {
+        "id": "toolchain_strip",
+        "nombre": "Toolchain en franja",
+        "fondo": "blanco",
+        "assets_fondo": ["fondo_blanco_bancolombia", "bg_content_solid_light"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "4 a 5 nodos horizontales (nombre de herramienta + rol en una línea)",
+          "conectores lineales entre nodos (no flechas gruesas ni cards)"
+        ],
+        "geometria": {
+          "referencia": "reticula.columnas.4",
+          "nodos": {
+            "y": 3.2,
+            "w": 2.5,
+            "x": [0.7, 3.85, 7.0, 10.15],
+            "nombre_size": 22,
+            "rol_size": 14
+          },
+          "conectores": { "y": 3.45, "componente": "flecha_conector", "grosor": 1.5, "color": "#D8D6D4" },
+          "chip_opcional": { "componente": "chip", "radio": "border-radius-full", "uso": "solo si hace falta etiquetar versión" }
+        },
+        "nota": "Los nodos son tipografía sobre el fondo, no tarjetas con sombra. Máximo 5 herramientas.",
+        "evitar": ["variante_tarjeta", "sombra_suave", "iconCircle decorativo sin semántica"]
+      },
+      {
+        "id": "manifiesto",
+        "nombre": "Manifiesto / frase con silencio",
+        "fondo": "oscuro | acento",
+        "assets_fondo": [
+          "fondo_contenido_negro_franjas_esquina",
+          "fono_contenido_negro_franja_izquierdo",
+          "bg_content_solid_dark"
+        ],
+        "tema": "oscuro | acento",
+        "elementos": [
+          "kicker corto opcional",
+          "frase de 1 o 2 líneas en display",
+          "línea de acento opcional",
+          "sin bullets ni tarjetas"
+        ],
+        "geometria": {
+          "kicker": { "x": 0.7, "y": 2.0, "w": 10 },
+          "frase": { "x": 0.7, "y": 2.6, "w": 11.5, "size": 34, "max_lineas": 2 },
+          "linea_acento": { "x": 0.7, "y": 5.0, "w": 2.6 },
+          "zona_prohibida": "no llenar el centro inferior con más texto"
+        },
+        "sin_numero_pagina": false,
+        "nota": "Máximo ~90 caracteres en la frase. Es el contraste del deck: aire y una sola idea.",
+        "evitar": ["cards", "listas", "más de una frase"]
+      },
+      {
+        "id": "doc_mapa",
+        "nombre": "Mapa de rutas / estructura de repo",
+        "fondo": "blanco | oscuro",
+        "assets_fondo": ["bg_content_solid_light", "bg_content_solid_dark"],
+        "tema": "claro | oscuro",
+        "elementos": [
+          "kicker",
+          "título",
+          "lista tipográfica de rutas o archivos (src/, test/, foundry.toml…)",
+          "descripción corta alineada a la derecha o debajo de cada ruta"
+        ],
+        "geometria": {
+          "filas": { "y_inicio": 2.15, "paso": 0.7, "max_items": 6 },
+          "ruta": { "x": 0.7, "w": 3.5, "size": 18, "peso": "Bold", "fuente": "monoespaciada opcional" },
+          "descripcion": { "x": 4.5, "w": 8.1, "size": 16 },
+          "separador_fila": { "opcional": true, "color": "#E4E2E0", "grosor": 1 }
+        },
+        "nota": "Índice tipográfico, no grid. Cada fila es ruta + significado. Sin iconos salvo que aporten semántica clara.",
+        "evitar": ["contenido_grid_2x2", "contenido_3_columnas", "sombra en filas"]
+      },
+      {
+        "id": "dos_columnas_asimetrica",
+        "nombre": "Dos columnas asimétricas (60/40)",
+        "fondo": "blanco",
+        "assets_fondo": ["fondo_blanco_bancolombia", "bg_content_solid_light", "bg_content_split_half"],
+        "tema": "claro",
+        "elementos": [
+          "kicker",
+          "título",
+          "columna principal (~60%): párrafo o lista corta",
+          "columna secundaria (~40%): código compacto, checklist o 3 bullets"
+        ],
+        "geometria": {
+          "columna_principal": { "x": 0.7, "y": 2.15, "w": 7.0, "size": 16 },
+          "columna_secundaria": { "x": 8.1, "y": 2.15, "w": 4.5, "size": 14 },
+          "secundaria_opciones": ["caja_codigo compacta", "checklist_vertical reducida", "3 bullets sin card"],
+          "sin_sombra": true
+        },
+        "nota": "La secundaria apoya; no compite. Evitar dos bloques con el mismo peso visual. Sobre split: respetar reticula.variantes_por_fondo.split.",
+        "evitar": ["dos tarjetas espejo", "mismo tamaño de tipografía en ambas columnas"]
+      },
+      {
+        "id": "checklist_vertical",
+        "nombre": "Checklist / lista tipográfica",
+        "fondo": "blanco | oscuro",
+        "assets_fondo": [
+          "fondo_blanco_bancolombia",
+          "bg_content_solid_light",
+          "bg_content_solid_dark"
+        ],
+        "tema": "claro | oscuro",
+        "elementos": [
+          "kicker",
+          "título",
+          "3 a 5 ítems con número tipográfico o guion, título corto y descripción opcional",
+          "aire generoso entre filas"
+        ],
+        "geometria": {
+          "filas": { "y_inicio": 2.15, "paso": 0.85, "max_items": 5 },
+          "numero": { "x": 0.7, "w": 0.7, "size": 22, "peso": "Bold" },
+          "texto": { "x": 1.6, "w": 10.5, "size_titulo": 20, "size_desc": 15 },
+          "sin_badge_circular": true
+        },
+        "nota": "Alternativa ligera a agenda con circleBadge. Preferir tipografía al badge cuando el deck ya tiene muchos círculos de color.",
+        "evitar": ["cards por ítem", "más de 5 filas", "iconos decorativos"]
       }
-    ]
+    ],
+    "rotacion_de_layouts": {
+      "descripcion": "Evitar que el deck se sienta como una grilla de tarjetas repetida. Rotar arquetipos según el tipo de mensaje.",
+      "regla": "Máximo 1 de cada 3 slides de contenido con grid de tarjetas (contenido_3_columnas, contenido_grid_2x2, matriz_2x2 con cards).",
+      "secuencia_sugerida": [
+        "manifiesto o pregunta_disparadora",
+        "secuencia_pasos, diagrama_fases o toolchain_strip",
+        "codigo o comando_hero",
+        "checklist_vertical, doc_mapa o lista_oscura",
+        "contenido_3_columnas solo si los ítems tienen el mismo peso visual"
+      ],
+      "preferir_sin_tarjeta": [
+        "comando_hero",
+        "toolchain_strip",
+        "manifiesto",
+        "doc_mapa",
+        "dos_columnas_asimetrica",
+        "checklist_vertical",
+        "cita_destacada",
+        "pregunta_disparadora",
+        "codigo",
+        "lista_oscura"
+      ],
+      "tarjeta_solo_cuando": "Hay 3 o más ítems con el mismo peso que conviene escanear en paralelo (comparación, features, pilares)."
+    }
   },
   "assets": {
     "descripcion": "Recursos gráficos disponibles para usar como fondos, marcas de agua o elementos decorativos en los slides.",
@@ -3474,6 +3530,8 @@
     "Elegir el fondo por la estructura del contenido, no por el color: los fondos rail exigen columna izquierda con poco contenido y los split exigen una idea por panel.",
     "Los acentos de marca sobre fondo claro solo van en formas (iconos, barras, badges, líneas), nunca como texto: ver accesibilidad.matriz_contraste.",
     "En tema oscuro las tarjetas no llevan sombra y el cuerpo va en blanco o gris_claro, nunca en gris_texto_suave.",
-    "Un mensaje por slide. Al exceder los topes de densidad se parte el slide; no se reduce la fuente por debajo de 12 pt."
+    "Un mensaje por slide. Al exceder los topes de densidad se parte el slide; no se reduce la fuente por debajo de 12 pt.",
+    "Rotar layouts: máximo 1 de cada 3 slides de contenido con grid de tarjetas. Preferir comando_hero, toolchain_strip, manifiesto, doc_mapa, dos_columnas_asimetrica, checklist_vertical, codigo, lista_oscura y secuencia_pasos. Ver tipos_de_slide.rotacion_de_layouts.",
+    "No defaultar a contenido_3_columnas o contenido_grid_2x2: elegir el arquetipo por el tipo de mensaje (comando, frase, flujo, mapa, checklist)."
   ]
 }

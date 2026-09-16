@@ -38,18 +38,16 @@ export function TxExplainer({ state }: { state: TxExplainerState }) {
   return (
     <div className="card">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
-          Tx
-        </span>
+        <span className="eyebrow">Tx</span>
         <span
-          className={`inline-flex items-center gap-2 px-2 py-0.5 text-xs font-semibold ${
+          className={`chip ${
             state.status === "confirmed"
-              ? "bg-verde/20 text-negro"
+              ? "bg-verde-100"
               : state.status === "error"
-                ? "bg-naranja/20 text-negro"
+                ? "bg-naranja-100"
                 : state.status === "sponsored"
-                  ? "bg-azul/20 text-negro"
-                  : "bg-amarillo/30 text-negro"
+                  ? "bg-azul-100"
+                  : "bg-amarillo-100"
           }`}
         >
           {pending ? (
@@ -64,7 +62,7 @@ export function TxExplainer({ state }: { state: TxExplainerState }) {
       </div>
 
       {pending ? (
-        <div className="mt-4 overflow-hidden bg-negro/5" aria-hidden>
+        <div className="mt-4 overflow-hidden rounded-[var(--radius-full)] bg-zebra" aria-hidden>
           <div className="tx-progress h-1 bg-amarillo" />
         </div>
       ) : null}
@@ -77,7 +75,7 @@ export function TxExplainer({ state }: { state: TxExplainerState }) {
       <p className="mt-1 text-sm leading-relaxed text-negro/70">{state.detail}</p>
       {state.hash ? (
         <a
-          className="mt-3 inline-block text-sm font-semibold text-negro underline decoration-azul decoration-2 underline-offset-2"
+          className="mt-3 inline-block text-sm font-semibold text-negro underline decoration-amarillo decoration-2 underline-offset-2"
           href={sepoliaTxUrl(state.hash)}
           target="_blank"
           rel="noreferrer"
@@ -86,7 +84,9 @@ export function TxExplainer({ state }: { state: TxExplainerState }) {
         </a>
       ) : null}
       {state.error ? (
-        <p className="mt-3 break-words text-sm text-naranja">{state.error}</p>
+        <p className="alert-error mt-3" role="alert">
+          {state.error}
+        </p>
       ) : null}
     </div>
   );

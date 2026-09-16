@@ -40,7 +40,7 @@ export function GuiaRwaPage() {
   return (
     <div>
       <header className="pb-8">
-        <p className="text-xs font-semibold tracking-[0.14em] text-naranja uppercase">
+        <p className="kicker">
           Guía de estudio
         </p>
         <h2 className="mt-1 font-display text-2xl font-extrabold md:text-3xl">
@@ -59,14 +59,14 @@ export function GuiaRwaPage() {
             <a
               key={s.id}
               href={`#${s.id}`}
-              className="rounded-[var(--radius-full)] border border-borde bg-tarjeta px-2.5 py-1 text-xs font-semibold text-muted hover:border-gris-claro hover:text-negro"
+              className="tab tab-idle"
             >
               {s.label}
             </a>
           ))}
           <Link
             to="/conceptos/enlaces"
-            className="rounded-[var(--radius-full)] border border-azul bg-azul-100 px-2.5 py-1 text-xs font-semibold text-negro"
+            className="tab tab-active"
           >
             Todos los enlaces →
           </Link>

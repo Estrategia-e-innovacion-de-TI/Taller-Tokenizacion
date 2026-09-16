@@ -32,10 +32,8 @@ export function ConceptosLayout() {
           <Link
             key={i.to}
             to={i.to}
-            className={`rounded-[var(--radius-full)] px-3.5 py-1.5 text-sm font-semibold transition ${
-              loc.pathname === i.to
-                ? "bg-amarillo text-negro shadow-sm"
-                : "border border-borde bg-tarjeta text-muted hover:bg-zebra hover:text-negro"
+            className={`tab ${
+              loc.pathname === i.to ? "tab-active" : "tab-idle"
             }`}
           >
             {i.label}

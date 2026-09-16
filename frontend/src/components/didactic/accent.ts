@@ -29,9 +29,9 @@ export const ACCENT_BAR: Record<Accent, string> = {
 };
 
 export const ACCENT_HEX: Record<Accent, string> = {
-  amarillo: "#FFD204",
-  verde: "#00C587",
-  naranja: "#FF803A",
-  rosado: "#FFB8D2",
-  azul: "#01CDEB",
+  amarillo: "#FDDA24",
+  verde: "#00C389",
+  naranja: "#FF7F41",
+  rosado: "#F5B6CD",
+  azul: "#59CBE8",
 };

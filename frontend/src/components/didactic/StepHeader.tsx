@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ACCENT_BAR, type Accent } from "./accent";
+import type { Accent } from "./accent";
 
 type Props = {
   eyebrow: string;
@@ -10,24 +10,16 @@ type Props = {
   action?: ReactNode;
 };
 
-/**
- * Encabezado de paso: mismo borde izquierdo que el contenido,
- * con barra de acento arriba para el wayfinding.
- */
 export function StepHeader({
   eyebrow,
   title,
   subtitle,
-  accent,
   action,
 }: Props) {
   return (
     <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
       <div className="min-w-0">
-        <span
-          className={`block h-1 w-12 rounded-[var(--radius-full)] ${ACCENT_BAR[accent]}`}
-          aria-hidden
-        />
+        <span className="block h-1 w-12 bg-amarillo" aria-hidden />
         <p className="eyebrow mt-4">{eyebrow}</p>
         <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-negro md:text-4xl">
           {title}
