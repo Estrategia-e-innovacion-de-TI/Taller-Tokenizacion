@@ -2,26 +2,34 @@
 pragma solidity ^0.8.24;
 
 import {Test, console2} from "forge-std/Test.sol";
+import {stdJson} from "forge-std/StdJson.sol";
 import {COPW} from "../src/COPW.sol";
 import {RENT} from "../src/RENT.sol";
 import {PropertySale} from "../src/PropertySale.sol";
 import {YieldDistributor} from "../src/YieldDistributor.sol";
 
-/// @notice Verifica los contratos desplegados en Sepolia vía fork (sin broadcast).
+/// @notice Verifica los contratos de deployments/latest.json vía fork (sin broadcast).
 /// Uso: make verify-live
 contract LiveForkTest is Test {
-    // deployments/latest.json (2026-08-20)
-    COPW constant copw = COPW(0x55815499F210C97187d242C63b6377D8F55b0553);
-    RENT constant rent = RENT(0x51CB22C6A1A51D57c0f112C6100e7b7Ffe7F24ba);
-    YieldDistributor constant distributor = YieldDistributor(0x121fD2529dC422183d389BCbaD99C4FF60A4B46f);
-    PropertySale constant sale = PropertySale(0x3900f8c6BaB4F1301A5feCaAdb5EB73D026aA526);
-    address constant treasury = 0x9A8D3f1D52a8018D4f01f04DB8845C8a58Cc6d4a;
+    using stdJson for string;
+
+    COPW internal copw;
+    RENT internal rent;
+    YieldDistributor internal distributor;
+    PropertySale internal sale;
+    address internal treasury;
 
     address internal alice = makeAddr("fork-alice");
 
     function setUp() public {
-        // Requiere --fork-url; si no hay fork, fallan los asserts de wiring.
         vm.createSelectFork(vm.envString("SEPOLIA_RPC_URL"));
+
+        string memory json = vm.readFile("deployments/latest.json");
+        copw = COPW(json.readAddress(".COPW"));
+        rent = RENT(json.readAddress(".RENT"));
+        distributor = YieldDistributor(json.readAddress(".YieldDistributor"));
+        sale = PropertySale(json.readAddress(".PropertySale"));
+        treasury = json.readAddress(".Treasury");
     }
 
     function test_live_wiring() public view {
@@ -33,6 +41,10 @@ contract LiveForkTest is Test {
         assertEq(distributor.sale(), address(sale), "distributor.sale");
         assertEq(address(distributor.rent()), address(rent), "distributor.rent");
         assertEq(address(distributor.copw()), address(copw), "distributor.copw");
+        console2.log("COPW", address(copw));
+        console2.log("RENT", address(rent));
+        console2.log("Sale", address(sale));
+        console2.log("Distributor", address(distributor));
         console2.log("wiring OK, RENT supply =", rent.totalSupply());
     }
 
@@ -45,12 +57,10 @@ contract LiveForkTest is Test {
         uint256 treasuryBefore = copw.balanceOf(treasury);
         uint256 supplyBefore = rent.totalSupply();
 
-        // 1) Faucet (simulado en fork; no toca Sepolia real)
         vm.prank(alice);
         copw.faucet();
         assertEq(copw.balanceOf(alice), copw.FAUCET_AMOUNT());
 
-        // 2) Comprar RENT → COPW a treasury
         vm.startPrank(alice);
         copw.approve(address(sale), cost);
         sale.buy(rentAmount);
@@ -61,7 +71,6 @@ contract LiveForkTest is Test {
         assertEq(copw.balanceOf(treasury), treasuryBefore + cost);
         assertEq(copw.balanceOf(alice), copw.FAUCET_AMOUNT() - cost);
 
-        // 3) Depositar yield (alice usa COPW restante)
         uint256 pendingBefore = distributor.pendingYield(alice);
         vm.startPrank(alice);
         copw.approve(address(distributor), yieldDeposit);
@@ -70,12 +79,9 @@ contract LiveForkTest is Test {
 
         uint256 pending = distributor.pendingYield(alice);
         assertGt(pending, pendingBefore, "alice should accrue yield");
-        // Con supply > rentAmount (otros holders), recibe su proporción; con solo ella en fork
-        // tras mint, recibe yield * aliceBal / totalSupply.
         uint256 expectedShare = (yieldDeposit * rentAmount) / rent.totalSupply();
         assertEq(pending - pendingBefore, expectedShare);
 
-        // 4) Claim
         uint256 copwBefore = copw.balanceOf(alice);
         vm.prank(alice);
         uint256 claimed = distributor.claim();
