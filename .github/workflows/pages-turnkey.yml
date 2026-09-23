@@ -1,12 +1,8 @@
-# Deploy por defecto (Privy). Plan B Turnkey: pages-turnkey.yml (workflow_dispatch).
-name: Deploy frontend to GitHub Pages
+# Plan B del taller: republica el sitio Turnkey en la misma URL de Pages.
+# No se dispara con push. En el taller: Actions → este workflow → Run workflow.
+name: Deploy Turnkey fallback to GitHub Pages
 
 on:
-  push:
-    branches: [main, master]
-    paths:
-      - "frontend/**"
-      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -26,6 +22,8 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: turnkey-fallback
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -36,7 +34,8 @@ jobs:
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
           VITE_PIMLICO_API_KEY: ${{ secrets.VITE_PIMLICO_API_KEY }}
-          VITE_PRIVY_APP_ID: ${{ secrets.VITE_PRIVY_APP_ID }}
+          VITE_TURNKEY_ORGANIZATION_ID: ${{ secrets.VITE_TURNKEY_ORGANIZATION_ID }}
+          VITE_TURNKEY_AUTH_PROXY_CONFIG_ID: ${{ secrets.VITE_TURNKEY_AUTH_PROXY_CONFIG_ID }}
           VITE_SEPOLIA_RPC_URL: ${{ secrets.VITE_SEPOLIA_RPC_URL }}
           VITE_COPW_ADDRESS: ${{ vars.VITE_COPW_ADDRESS }}
           VITE_RENT_ADDRESS: ${{ vars.VITE_RENT_ADDRESS }}

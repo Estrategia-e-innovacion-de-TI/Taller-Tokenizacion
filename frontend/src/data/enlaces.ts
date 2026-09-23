@@ -182,9 +182,9 @@ export const ENLACES_GRUPOS: EnlaceGroup[] = [
         starred: true,
       },
       {
-        id: "turnkey",
-        href: "https://docs.turnkey.com/",
-        label: "Turnkey docs",
+        id: "privy",
+        href: "https://docs.privy.io/",
+        label: "Privy docs",
       },
       {
         id: "permissionless",

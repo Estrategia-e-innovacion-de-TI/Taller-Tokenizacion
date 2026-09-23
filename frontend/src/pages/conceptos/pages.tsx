@@ -244,7 +244,7 @@ export function ConceptoAA() {
       </p>
       <p>
         Si entras con MetaMask, no hay patrocinio: firmas como EOA y pagas ETH de
-        Sepolia. El paymaster aplica solo a la vía embebida (Turnkey).
+        Sepolia. El paymaster aplica solo a la vía embebida (Privy).
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -261,15 +261,15 @@ export function ConceptoAA() {
           links={enlaces("pimlico", "permissionless")}
         />
         <ConceptExpand
-          term="Turnkey / embedded"
+          term="Privy / embedded"
           accent="amarillo"
-          summary="Billetera embebida vía email (Auth Proxy): UX bancaria sin seed phrase, y es la vía con gas patrocinado."
-          links={enlaces("turnkey")}
+          summary="Billetera embebida vía email (TEE + Shamir): UX bancaria sin seed phrase, y es la vía con gas patrocinado."
+          links={enlaces("privy")}
         />
       </div>
 
       <DeepLinks
-        items={enlaces("permissionless", "pimlico", "turnkey", "eip4337").map(
+        items={enlaces("permissionless", "pimlico", "privy", "eip4337").map(
           (e) => ({
             href: e.href,
             label: e.label,

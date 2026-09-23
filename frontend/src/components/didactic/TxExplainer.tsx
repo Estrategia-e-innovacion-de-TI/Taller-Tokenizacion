@@ -14,7 +14,7 @@ const statusLabel: Record<TxExplainerState["status"], string> = {
 const gasHint: Record<NonNullable<TxExplainerState["gasMode"]>, string> = {
   sponsored: "Gas patrocinado · no se usa ETH",
   wallet: "MetaMask · pagas ETH de Sepolia",
-  email: "Email · firma Turnkey (ETH si no hay paymaster)",
+  email: "Email · firma Privy (ETH si no hay paymaster)",
 };
 
 const pendingStatuses = new Set([

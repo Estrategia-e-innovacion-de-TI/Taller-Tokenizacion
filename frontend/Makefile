@@ -29,7 +29,7 @@ env: ## Crea .env desde .env.example si no existe
 		echo ".env ya existe"; \
 	else \
 		cp .env.example .env; \
-		echo "Creado .env — completa las VITE_* (addresses, Pimlico, Turnkey)"; \
+		echo "Creado .env — completa las VITE_* (addresses, Pimlico, Privy)"; \
 	fi
 
 check-env: ## Avisa si faltan addresses en .env
