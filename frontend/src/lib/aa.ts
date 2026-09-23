@@ -28,7 +28,7 @@ function pimlicoRpcUrl(): string {
 }
 
 /**
- * Kernel (ERC-4337) + paymaster Pimlico, firmado por el owner Turnkey.
+ * Kernel (ERC-4337) + paymaster Pimlico, firmado por el owner Privy.
  * Solo para login email — MetaMask no usa esta vía.
  */
 export async function createSponsoredKernelClient(owner: LocalAccount): Promise<{

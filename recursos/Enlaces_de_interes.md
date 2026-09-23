@@ -37,6 +37,6 @@ Prioridad de lectura para la charla marcada con ★.
 ## Estándares / stack de la demo
 
 - [ERC-3643](https://www.erc3643.org/) — tokens permissioned (solo mención en conceptos)
-- [Turnkey docs](https://docs.turnkey.com/) · [Auth Proxy](https://docs.turnkey.com/features/authentication/auth-proxy)
+- [Privy docs](https://docs.privy.io/) · [security / TEE](https://docs.privy.io/security/wallet-infrastructure/architecture)
 - [permissionless.js](https://docs.pimlico.io/permissionless) · [Pimlico](https://docs.pimlico.io/)
 - [viem](https://viem.sh/) · [Foundry Book](https://book.getfoundry.sh/) · [Sepolia faucet](https://sepoliafaucet.com/)

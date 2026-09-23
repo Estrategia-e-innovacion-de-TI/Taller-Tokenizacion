@@ -10,8 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@turnkey/react-wallet-kit": "^2.3.1",
-    "@turnkey/viem": "^0.14.34",
+    "@privy-io/react-auth": "^3.45.0",
     "mermaid": "^11.16.1",
     "permissionless": "^0.3.7",
     "react": "^19.2.8",

@@ -9,21 +9,24 @@ import {
   type ReactNode,
 } from "react";
 import {
-  AuthState,
-  ClientState,
-  OtpType,
-  useTurnkey,
-  type Wallet,
-} from "@turnkey/react-wallet-kit";
-import { createAccount } from "@turnkey/viem";
+  getEmbeddedConnectedWallet,
+  toViemAccount,
+  useCreateWallet,
+  useLoginWithEmail,
+  usePrivy,
+  useWallets,
+  type ConnectedWallet,
+  type User,
+} from "@privy-io/react-auth";
 import {
   createWalletClient,
   custom,
   http,
   type Address,
+  type LocalAccount,
   type WalletClient,
 } from "viem";
-import { turnkeyConfigured } from "./turnkey-config";
+import { privyConfigured } from "./privy-config";
 import {
   createSponsoredKernelClient,
   type SponsoredSmartAccountClient,
@@ -38,6 +41,7 @@ import {
 } from "./viem";
 
 export type AuthMode = "none" | "email" | "wallet";
+export type EmailClientState = "loading" | "ready" | "error";
 
 type Session = {
   mode: AuthMode;
@@ -50,26 +54,23 @@ type Session = {
   publicClient: AppPublicClient | null;
 };
 
-type PendingEmailOtp = {
-  email: string;
-  otpId: string;
-  otpEncryptionTargetBundle: string;
-};
-
 type AuthContextValue = Session & {
   connecting: boolean;
   error: string | null;
   /** Email awaiting OTP verification, if any. */
   pendingEmailOtp: string | null;
-  /** Turnkey ClientState: loading | ready | error */
-  turnkeyReady: boolean;
-  turnkeyClientState: string | undefined;
+  emailReady: boolean;
+  emailClientState: EmailClientState;
   connectEmail: (email: string) => Promise<void>;
   verifyEmailOtp: (otpCode: string) => Promise<void>;
   cancelEmailOtp: () => void;
   connectWallet: () => Promise<void>;
   disconnect: () => void;
   isConnected: boolean;
+  /** Progreso del login email (OTP → wallet → Kernel). */
+  connectingHint: string | null;
+  /** OTP ya válido; falta wallet/Kernel. */
+  privyAuthenticated: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -83,13 +84,50 @@ const empty: Session = {
   publicClient: null,
 };
 
-/** Sin espacios; conserva alfanumérico (Turnkey puede configurar OTP no solo numérico). */
+/** Sin espacios; OTP de Privy es numérico de 6 dígitos, aceptamos 6–9. */
 function normalizeOtpCode(raw: string): string {
   return raw.replace(/\s+/g, "").trim();
 }
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  label: string,
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => {
+          reject(
+            new Error(
+              `${label} tardó más de ${Math.round(ms / 1000)} s. Recarga e inténtalo de nuevo.`,
+            ),
+          );
+        }, ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+function findPrivyWallet(wallets: ConnectedWallet[]): ConnectedWallet | null {
+  return (
+    getEmbeddedConnectedWallet(wallets) ??
+    wallets.find((w) => w.walletClientType === "privy") ??
+    wallets.find((w) => w.connectorType === "embedded") ??
+    null
+  );
+}
+
+function userEmailOf(user: User | null | undefined): string | undefined {
+  return user?.email?.address;
 }
 
 function formatAuthError(e: unknown, fallback: string): string {
@@ -106,143 +144,129 @@ function formatAuthError(e: unknown, fallback: string): string {
   const lower = raw.toLowerCase();
 
   if (
-    withExtras.code === "INVALID_OTP_CODE" ||
+    withExtras.code === "invalid_credentials" ||
     lower.includes("invalid otp") ||
-    lower.includes("otp code is invalid")
+    lower.includes("otp code is invalid") ||
+    lower.includes("incorrect code") ||
+    lower.includes("invalid email and code") ||
+    (lower.includes("422") && lower.includes("passwordless"))
   ) {
-    return "Código OTP inválido o vencido. Pulsa «Reenviar código» e usa el más reciente del correo.";
+    return "Código inválido, vencido o ya usado. Pulsa «Reenviar código» e ingresa el nuevo. Si ya habías verificado, no reuses el anterior: recarga o pulsa Reintentar.";
   }
 
   if (
     lower.includes("failed to verify otp") ||
     lower.includes("otp verification failed") ||
-    lower.includes("failed to complete otp")
+    lower.includes("too many")
   ) {
-    return "No se pudo verificar el OTP. Usa el código más reciente; en Turnkey Auth Proxy revisa Allowed Origins (URL exacta de esta página); o usa MetaMask.";
+    return "No se pudo verificar el OTP. Usa el código más reciente; en Privy revisa Allowed Origins (URL exacta de esta página); o usa MetaMask.";
   }
 
   if (
     lower.includes("origin") ||
     lower.includes("cors") ||
-    lower.includes("forbidden")
+    lower.includes("forbidden") ||
+    lower.includes("allowlist") ||
+    lower.includes("not allowed")
   ) {
-    return "El origen de esta página no está autorizado en Turnkey (Allowed Origins). Añade la URL exacta (p. ej. http://localhost:5173 o https://….github.io).";
-  }
-
-  if (lower.includes("sesión turnkey no disponible")) {
-    return "El OTP se verificó, pero la sesión aún no estaba lista. Espera un momento o recarga; no hace falta otro código si ya entraste.";
+    return "El origen de esta página no está autorizado en Privy (Allowed Origins). Añade la URL exacta (p. ej. http://localhost:5173 o https://….github.io).";
   }
 
   return raw || fallback;
 }
 
-function findEthereumAddress(wallets: Wallet[]): {
-  address: Address;
-  organizationId: string;
-} | null {
-  for (const wallet of wallets) {
-    for (const account of wallet.accounts) {
-      if (
-        account.addressFormat === "ADDRESS_FORMAT_ETHEREUM" &&
-        account.address
-      ) {
-        return {
-          address: account.address as Address,
-          organizationId: account.organizationId,
-        };
-      }
-    }
-  }
-  return null;
-}
-
 /**
- * Auth dual: email OTP (Turnkey Auth Proxy) o billetera caliente (MetaMask).
+ * Auth: email OTP (Privy) o billetera caliente (MetaMask).
  * Email usa RPC HTTP de Sepolia; MetaMask usa el RPC de la billetera.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const {
-    initOtp,
-    completeOtp,
-    logout,
-    httpClient,
-    session: turnkeySession,
-    refreshWallets,
-    createWallet,
-    clientState,
-    authState,
-    user,
-  } = useTurnkey();
+  const { ready, authenticated, user, logout, error: privyInitError } =
+    usePrivy();
+  const { sendCode, loginWithCode } = useLoginWithEmail();
+  const { wallets } = useWallets();
+  const { createWallet } = useCreateWallet();
 
   const [session, setSession] = useState<Session>(empty);
-  const [pendingOtp, setPendingOtp] = useState<PendingEmailOtp | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const [connectingHint, setConnectingHint] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const restoringRef = useRef(false);
   const restoreAttemptedRef = useRef(false);
   const buildingRef = useRef(false);
+  const buildingPromiseRef = useRef<Promise<void> | null>(null);
 
-  const clientStateRef = useRef(clientState);
-  const httpClientRef = useRef(httpClient);
-  const turnkeySessionRef = useRef(turnkeySession);
-  const authStateRef = useRef(authState);
-  const userEmailRef = useRef(user?.userEmail);
-  clientStateRef.current = clientState;
-  httpClientRef.current = httpClient;
-  turnkeySessionRef.current = turnkeySession;
-  authStateRef.current = authState;
-  userEmailRef.current = user?.userEmail;
+  const readyRef = useRef(ready);
+  const walletsRef = useRef(wallets);
+  const authenticatedRef = useRef(authenticated);
+  const userEmailRef = useRef(userEmailOf(user));
+  readyRef.current = ready;
+  walletsRef.current = wallets;
+  authenticatedRef.current = authenticated;
+  userEmailRef.current = userEmailOf(user);
 
-  /** Espera a que el kit deje sesión + httpClient tras completeOtp (evita carrera). */
-  const waitForTurnkeySession = useCallback(async (timeoutMs = 15_000) => {
-    const deadline = Date.now() + timeoutMs;
-    while (Date.now() < deadline) {
-      if (httpClientRef.current && turnkeySessionRef.current) {
-        return {
-          httpClient: httpClientRef.current,
-          turnkeySession: turnkeySessionRef.current,
-        };
+  const emailClientState: EmailClientState = privyInitError
+    ? "error"
+    : ready
+      ? "ready"
+      : "loading";
+
+  const waitForEmbeddedWallet = useCallback(
+    async (timeoutMs = 25_000): Promise<ConnectedWallet> => {
+      const deadline = Date.now() + timeoutMs;
+      let createError: string | null = null;
+      let createStarted = false;
+
+      while (Date.now() < deadline) {
+        const found = findPrivyWallet(walletsRef.current);
+        if (found) return found;
+
+        if (!createStarted && authenticatedRef.current) {
+          createStarted = true;
+          setConnectingHint("Creando wallet Privy…");
+          try {
+            await withTimeout(createWallet(), 20_000, "Crear wallet Privy");
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            const lower = msg.toLowerCase();
+            if (lower.includes("already has") || lower.includes("already exists")) {
+              /* wallet ya creada; esperamos a useWallets */
+            } else {
+              createError = msg;
+              console.warn("[auth] createWallet", e);
+            }
+          }
+        }
+        await sleep(200);
       }
-      await sleep(100);
-    }
-    throw new Error("Sesión Turnkey no disponible. Reintenta el login.");
-  }, []);
 
-  const buildTurnkeySession = useCallback(
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      throw new Error(
+        createError
+          ? `Privy no creó la wallet: ${createError}. Allowed Origins debe incluir exactamente ${origin} (el puerto cuenta: :5173 ≠ :5174).`
+          : `No apareció la wallet embebida. En Privy Dashboard → Configuration → Allowed Origins añade ${origin}. Embedded wallets Ethereum deben estar activas.`,
+      );
+    },
+    [createWallet],
+  );
+
+  const buildEmailSession = useCallback(
     async (email?: string) => {
-      if (buildingRef.current) return;
-      buildingRef.current = true;
-      try {
-        const { httpClient: client, turnkeySession: tkSession } =
-          await waitForTurnkeySession();
+      if (buildingPromiseRef.current) return buildingPromiseRef.current;
 
-        let wallets = await refreshWallets();
-        let eth = findEthereumAddress(wallets);
-
-        if (!eth) {
-          await createWallet({
-            walletName: "Taller RENT",
-            accounts: ["ADDRESS_FORMAT_ETHEREUM"],
-          });
-          wallets = await refreshWallets();
-          eth = findEthereumAddress(wallets);
-        }
-
-        if (!eth) {
-          throw new Error(
-            "No se encontró una cuenta Ethereum en Turnkey. Revisa el Auth Proxy.",
-          );
-        }
-
-        const turnkeyAccount = await createAccount({
-          client,
-          organizationId: eth.organizationId || tkSession.organizationId,
-          signWith: eth.address,
-          ethereumAddress: eth.address,
-        });
+      const run = (async () => {
+        setConnectingHint("Buscando wallet Privy…");
+        const embedded = await waitForEmbeddedWallet();
+        setConnectingHint("Listo. Armando Kernel…");
+        const ownerAccount = (await withTimeout(
+          toViemAccount({ wallet: embedded }),
+          15_000,
+          "toViemAccount",
+        )) as LocalAccount;
 
         const walletClient = createWalletClient({
-          account: turnkeyAccount,
+          account: ownerAccount,
           chain,
           transport: http(
             (import.meta.env.VITE_SEPOLIA_RPC_URL as string | undefined) ||
@@ -253,43 +277,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (!pimlicoApiKey) {
           throw new Error(
-            "Login email requiere VITE_PIMLICO_API_KEY (gas patrocinado). Sin eso la cuenta Turnkey no tiene ETH para pagar gas.",
+            "Login email requiere VITE_PIMLICO_API_KEY (gas patrocinado). Sin eso la cuenta Privy no tiene ETH para pagar gas.",
           );
         }
 
+        setConnectingHint("Armando Kernel + Pimlico…");
         const { client: smartAccountClient, address: kernelAddress } =
-          await createSponsoredKernelClient(turnkeyAccount);
+          await withTimeout(
+            createSponsoredKernelClient(ownerAccount),
+            20_000,
+            "Kernel / Pimlico",
+          );
 
         setSession({
           mode: "email",
-          ownerAddress: eth.address,
+          ownerAddress: embedded.address as Address,
           smartAccountAddress: kernelAddress,
           email: email || userEmailRef.current,
           walletClient,
           smartAccountClient,
           publicClient,
         });
-        setPendingOtp(null);
+        setPendingEmail(null);
         setError(null);
-      } finally {
+        setConnectingHint(null);
+      })().finally(() => {
         buildingRef.current = false;
-      }
+        buildingPromiseRef.current = null;
+      });
+
+      buildingRef.current = true;
+      buildingPromiseRef.current = run;
+      return run;
     },
-    [waitForTurnkeySession, refreshWallets, createWallet],
+    [waitForEmbeddedWallet],
   );
 
-  // Restaurar sesión Turnkey al recargar (o si el OTP ya autenticó y falta Kernel).
+  // Si el OTP ya autenticó, arma Kernel.
   useEffect(() => {
     if (
-      !turnkeyConfigured ||
-      clientState !== ClientState.Ready ||
-      authState !== AuthState.Authenticated ||
+      !privyConfigured ||
+      !ready ||
+      !authenticated ||
       session.mode !== "none" ||
-      connecting ||
       restoringRef.current ||
       buildingRef.current ||
-      restoreAttemptedRef.current ||
-      pendingOtp
+      restoreAttemptedRef.current
     ) {
       return;
     }
@@ -297,54 +330,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restoringRef.current = true;
     restoreAttemptedRef.current = true;
     setConnecting(true);
+    setConnectingHint("Sesión Privy lista. Armando cuenta…");
     setError(null);
-    void buildTurnkeySession(user?.userEmail)
+    void buildEmailSession(userEmailOf(user))
       .catch((e) => {
         console.error("[auth] restore session", e);
         setError(formatAuthError(e, "No se pudo restaurar la sesión de email"));
         setSession(empty);
-        // Permitir otro intento si la sesión aún no estaba lista.
-        restoreAttemptedRef.current = false;
       })
       .finally(() => {
         restoringRef.current = false;
         setConnecting(false);
+        setConnectingHint(null);
       });
-  }, [
-    clientState,
-    authState,
-    session.mode,
-    connecting,
-    pendingOtp,
-    buildTurnkeySession,
-    user?.userEmail,
-  ]);
+  }, [ready, authenticated, session.mode, buildEmailSession, user]);
 
   const disconnect = useCallback(() => {
     setSession(empty);
-    setPendingOtp(null);
+    setPendingEmail(null);
+    setConnectingHint(null);
     setError(null);
     restoreAttemptedRef.current = false;
-    if (authState === AuthState.Authenticated) {
+    if (authenticated) {
       void logout().catch(() => {
         /* ignore logout errors */
       });
     }
-  }, [authState, logout]);
+  }, [authenticated, logout]);
 
   const cancelEmailOtp = useCallback(() => {
-    setPendingOtp(null);
+    setPendingEmail(null);
     setError(null);
   }, []);
 
   const connectEmail = useCallback(
     async (email: string) => {
       setConnecting(true);
+      setConnectingHint("Enviando código…");
       setError(null);
       try {
-        if (!turnkeyConfigured) {
+        if (!privyConfigured) {
           throw new Error(
-            "Turnkey no está configurado. Define VITE_TURNKEY_ORGANIZATION_ID y VITE_TURNKEY_AUTH_PROXY_CONFIG_ID, o usa «Conectar billetera».",
+            "Privy no está configurado. Define VITE_PRIVY_APP_ID, o usa «Conectar billetera».",
           );
         }
 
@@ -352,15 +379,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           typeof window !== "undefined" ? window.location.origin : "";
 
         const deadline = Date.now() + 12_000;
-        while (clientStateRef.current !== ClientState.Ready) {
-          if (clientStateRef.current === ClientState.Error) {
+        while (!readyRef.current) {
+          if (privyInitError) {
             throw new Error(
-              `Turnkey no pudo inicializar. Origen actual: ${origin}. En Auth Proxy → Allowed Origins añade exactamente esa URL (local: http://localhost:5173 · Pages: https://estrategia-e-innovacion-de-ti.github.io), guarda, recarga e intenta de nuevo.`,
+              `Privy no pudo inicializar. Origen actual: ${origin}. En Dashboard → Allowed Origins añade exactamente esa URL (local: http://localhost:5173 · Pages: https://estrategia-e-innovacion-de-ti.github.io), guarda, recarga e intenta de nuevo.`,
             );
           }
           if (Date.now() >= deadline) {
             throw new Error(
-              `Turnkey no quedó listo a tiempo (estado: ${clientStateRef.current ?? "desconocido"}). Recarga la página. Si persiste, revisa Allowed Origins para ${origin}.`,
+              `Privy no quedó listo a tiempo. Recarga la página. Si persiste, revisa Allowed Origins para ${origin}.`,
             );
           }
           await sleep(200);
@@ -371,96 +398,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           throw new Error("Ingresa un correo válido.");
         }
 
-        const result = await initOtp({
-          otpType: OtpType.Email,
-          contact: trimmed,
-        });
-
-        if (!result?.otpId || !result?.otpEncryptionTargetBundle) {
-          throw new Error(
-            "Turnkey no devolvió un OTP válido. Revisa Allowed Origins y Auth Proxy.",
-          );
+        if (authenticatedRef.current) {
+          restoreAttemptedRef.current = true;
+          await buildEmailSession(trimmed);
+          return;
         }
 
-        setPendingOtp({
-          email: trimmed,
-          otpId: result.otpId,
-          otpEncryptionTargetBundle: result.otpEncryptionTargetBundle,
-        });
+        await sendCode({ email: trimmed });
+        setPendingEmail(trimmed);
+        setConnectingHint(null);
       } catch (e) {
-        console.error("[auth] initOtp", e);
+        console.error("[auth] sendCode", e);
         setError(formatAuthError(e, "Error de autenticación"));
-        setPendingOtp(null);
+        setPendingEmail(null);
       } finally {
         setConnecting(false);
+        setConnectingHint(null);
       }
     },
-    [initOtp],
+    [sendCode, privyInitError, buildEmailSession],
   );
 
   const verifyEmailOtp = useCallback(
     async (otpCode: string) => {
-      if (!pendingOtp) {
+      if (!pendingEmail) {
         setError("Primero solicita el código al correo.");
         return;
       }
-      if (!pendingOtp.otpEncryptionTargetBundle) {
-        setError(
-          "Sesión OTP incompleta. Pulsa «Reenviar código» e inténtalo de nuevo.",
-        );
-        return;
-      }
       setConnecting(true);
+      setConnectingHint("Verificando código…");
       setError(null);
-      const email = pendingOtp.email;
+      const email = pendingEmail;
       try {
         const code = normalizeOtpCode(otpCode);
         if (code.length < 6 || code.length > 9) {
-          throw new Error(
-            "El código OTP debe tener entre 6 y 9 caracteres (según Turnkey).",
-          );
+          throw new Error("El código OTP debe tener entre 6 y 9 caracteres.");
         }
 
-        await completeOtp({
-          otpId: pendingOtp.otpId,
-          otpCode: code,
-          otpEncryptionTargetBundle: pendingOtp.otpEncryptionTargetBundle,
-          contact: email,
-          otpType: OtpType.Email,
-        });
+        if (!authenticatedRef.current) {
+          setConnectingHint("Verificando código…");
+          await withTimeout(
+            loginWithCode({ code, email } as { code: string }),
+            25_000,
+            "loginWithCode",
+          );
+        } else {
+          setConnectingHint("Sesión ya activa. Creando wallet…");
+        }
 
-        // OTP ya consumido: limpiar UI y esperar a que el kit publique la sesión.
-        setPendingOtp(null);
         restoreAttemptedRef.current = true;
-
-        await waitForTurnkeySession();
-        await buildTurnkeySession(email);
+        await buildEmailSession(email);
       } catch (e) {
-        console.error("[auth] completeOtp / build session", e);
-        // Si el OTP ya validó y solo falló el armado, dejar que el effect restaure.
-        if (
-          authStateRef.current === AuthState.Authenticated ||
-          turnkeySessionRef.current
-        ) {
+        console.error("[auth] loginWithCode / build session", e);
+        if (authenticatedRef.current) {
           restoreAttemptedRef.current = false;
-          setPendingOtp(null);
           setError(
-            "Código verificado. Preparando tu cuenta… Si no conecta en unos segundos, recarga la página (no hace falta otro OTP).",
+            formatAuthError(
+              e,
+              "Código verificado, pero no se armó la Kernel. Recarga (no hace falta otro OTP).",
+            ),
           );
         } else {
           setError(formatAuthError(e, "No se pudo verificar el código"));
         }
       } finally {
         setConnecting(false);
+        setConnectingHint(null);
       }
     },
-    [pendingOtp, completeOtp, waitForTurnkeySession, buildTurnkeySession],
+    [pendingEmail, loginWithCode, buildEmailSession],
   );
 
   const connectWallet = useCallback(async () => {
     setConnecting(true);
     setError(null);
-    setPendingOtp(null);
+    setPendingEmail(null);
     try {
       if (!window.ethereum) {
         throw new Error(
@@ -468,7 +480,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
       }
 
-      if (authState === AuthState.Authenticated) {
+      if (authenticated) {
         await logout().catch(() => undefined);
       }
 
@@ -503,34 +515,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setConnecting(false);
     }
-  }, [authState, logout]);
+  }, [authenticated, logout]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       ...session,
       connecting,
+      connectingHint,
       error,
-      pendingEmailOtp: pendingOtp?.email ?? null,
-      turnkeyReady: clientState === ClientState.Ready,
-      turnkeyClientState: clientState,
+      pendingEmailOtp: pendingEmail,
+      emailReady: ready,
+      emailClientState,
       connectEmail,
       verifyEmailOtp,
       cancelEmailOtp,
       connectWallet,
       disconnect,
       isConnected: Boolean(session.smartAccountAddress),
+      privyAuthenticated: authenticated,
     }),
     [
       session,
       connecting,
+      connectingHint,
       error,
-      pendingOtp,
-      clientState,
+      pendingEmail,
+      ready,
+      emailClientState,
       connectEmail,
       verifyEmailOtp,
       cancelEmailOtp,
       connectWallet,
       disconnect,
+      authenticated,
     ],
   );
 

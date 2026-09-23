@@ -299,7 +299,7 @@ export function DemoPage() {
                 items={[
                   {
                     label: "Email",
-                    body: "Turnkey firma. Kernel + Pimlico pagan el gas. Los tokens llegan a la smart account, no al owner.",
+                    body: "Privy firma. Kernel + Pimlico pagan el gas. Los tokens llegan a la smart account, no al owner.",
                   },
                   {
                     label: "MetaMask",
@@ -326,7 +326,7 @@ export function DemoPage() {
                   />
                   {showOwnerAddress && auth.ownerAddress ? (
                     <PublicAddress
-                      label="Owner Turnkey (firma)"
+                      label="Owner Privy (firma)"
                       address={auth.ownerAddress}
                       hint={`Creada con el correo${auth.email ? ` ${auth.email}` : ""}. Firma las UserOps; no guarda los tokens.`}
                     />
@@ -355,18 +355,22 @@ export function DemoPage() {
                   onClick={() => void auth.connectEmail(email)}
                   className="btn-primary mt-auto w-full sm:w-auto"
                 >
-                  {auth.connecting ? "Conectando…" : "Continuar con email"}
+                  {auth.connecting
+                    ? auth.connectingHint || "Conectando…"
+                    : "Continuar con email"}
                 </button>
-                {!auth.isConnected && auth.turnkeyClientState === "error" ? (
+                {auth.connectingHint ? (
+                  <p className="text-xs text-negro/50">{auth.connectingHint}</p>
+                ) : null}
+                {!auth.isConnected && auth.emailClientState === "error" ? (
                   <p className="alert-error" role="alert">
-                    Turnkey no inició. Allowed Origins debe incluir{" "}
+                    Privy no inició. Allowed Origins debe incluir{" "}
                     <code className="text-xs">{window.location.origin}</code>.
                   </p>
                 ) : null}
-                {!auth.isConnected &&
-                auth.turnkeyClientState === "loading" ? (
+                {!auth.isConnected && auth.emailClientState === "loading" ? (
                   <p className="text-xs text-negro/50">
-                    Inicializando Turnkey…
+                    Inicializando Privy…
                   </p>
                 ) : null}
               </>
@@ -395,20 +399,29 @@ export function DemoPage() {
                   />
                 </label>
                 <p className="text-xs text-negro/50">
-                  Usa el código más reciente. Si falla, «Reenviar código» (el
-                  anterior queda inválido).
+                  {auth.privyAuthenticated && !auth.isConnected
+                    ? "El código ya se usó. No lo vuelvas a ingresar: reintenta crear la wallet."
+                    : "Usa el código más reciente. Si falla, «Reenviar código» (el anterior queda inválido)."}
                 </p>
                 <button
                   type="button"
                   disabled={
                     auth.connecting ||
-                    otpCode.replace(/\s+/g, "").length < 6
+                    (!auth.privyAuthenticated &&
+                      otpCode.replace(/\s+/g, "").length < 6)
                   }
                   onClick={() => void auth.verifyEmailOtp(otpCode)}
                   className="btn-primary mt-auto w-full sm:w-auto"
                 >
-                  Verificar código
+                  {auth.connecting
+                    ? auth.connectingHint || "Verificando…"
+                    : auth.privyAuthenticated
+                      ? "Reintentar crear wallet"
+                      : "Verificar código"}
                 </button>
+                {auth.connectingHint ? (
+                  <p className="text-xs text-negro/50">{auth.connectingHint}</p>
+                ) : null}
                 <div className="flex flex-wrap gap-4">
                   <button
                     type="button"

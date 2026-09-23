@@ -19,7 +19,7 @@ Demo educativa de **tokenización de un inmueble** orientada a ejecutivos de ban
 
 - **Contratos:** Foundry (`contracts/`) — COPW, RENT, PropertySale, YieldDistributor
 - **Frontend:** Vite + React + TypeScript + Tailwind (`frontend/`) → GitHub Pages
-- **Auth:** Turnkey (email, Auth Proxy) o billetera caliente
+- **Auth:** Privy (email, Pages) o billetera caliente. Plan B: rama `turnkey-fallback`
 - **AA / gas:** permissionless (Kernel) + Pimlico — el usuario solo firma
 
 ## Estructura
@@ -56,6 +56,15 @@ make dev
 ```
 
 Atajos desde la raíz: `make help`.
+
+## GitHub Pages
+
+Una sola URL. Push a `main` publica **Privy**. Si el email falla en el taller, republica Turnkey (misma URL, ~2 min):
+
+1. GitHub → **Actions** → **Deploy Turnkey fallback to GitHub Pages** → **Run workflow**
+2. O: `gh workflow run pages-turnkey.yml`
+
+La rama `turnkey-fallback` es el sitio Turnkey que ya funciona. No la mezcles con `main`. El secret `VITE_PRIVY_APP_ID` tiene que existir antes del primer deploy Privy.
 
 ## Agenda sugerida
 

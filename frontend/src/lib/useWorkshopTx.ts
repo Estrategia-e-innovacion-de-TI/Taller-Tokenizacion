@@ -114,8 +114,8 @@ export function useWorkshopTx() {
             status: "signing",
             detail:
               opts.calls.length > 1
-                ? "Firmando lote (approve + acción) con Turnkey…"
-                : "Firma la UserOperation (Turnkey) — Pimlico patrocina el gas.",
+                ? "Firmando lote (approve + acción) con Privy…"
+                : "Firma la UserOperation (Privy) — Pimlico patrocina el gas.",
           }));
           setExplainer((s) => ({
             ...s,

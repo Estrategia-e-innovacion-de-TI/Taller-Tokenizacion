@@ -1,8 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { TurnkeyProvider } from "@turnkey/react-wallet-kit";
-import "@turnkey/react-wallet-kit/styles.css";
+import { PrivyProvider } from "@privy-io/react-auth";
 import { AuthProvider } from "./lib/auth";
-import { turnkeyConfig } from "./lib/turnkey-config";
+import { privyAppId, privyConfig } from "./lib/privy-config";
 import { AppShell } from "./components/shell/AppShell";
 import { HomePage } from "./pages/HomePage";
 import { DemoPage } from "./pages/DemoPage";
@@ -19,7 +18,7 @@ import {
 
 export default function App() {
   return (
-    <TurnkeyProvider config={turnkeyConfig}>
+    <PrivyProvider appId={privyAppId} config={privyConfig}>
       <AuthProvider>
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <AppShell>
@@ -43,6 +42,6 @@ export default function App() {
           </AppShell>
         </BrowserRouter>
       </AuthProvider>
-    </TurnkeyProvider>
+    </PrivyProvider>
   );
 }
