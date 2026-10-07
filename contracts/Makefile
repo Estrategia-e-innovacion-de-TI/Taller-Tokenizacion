@@ -11,6 +11,7 @@ export
 endif
 
 RPC_URL        ?= $(or $(SEPOLIA_RPC_URL),$(BASE_SEPOLIA_RPC_URL),https://rpc.sepolia.org)
+CHAIN_ID       ?= $(if $(SEPOLIA_RPC_URL),11155111,$(if $(BASE_SEPOLIA_RPC_URL),84532,11155111))
 SCRIPT         ?= script/Deploy.s.sol:Deploy
 TREASURY       ?=
 ETHERSCAN_KEY  ?= $(ETHERSCAN_API_KEY)
@@ -84,6 +85,8 @@ anvil: ## Nodo local Anvil
 
 # --- Deploy ---
 # PK interactiva. RPC / Etherscan / TREASURY desde .env
+# Sepolia (EIP-7623): eth_estimateGas del CREATE RENT ~4.8M; la simulación
+# local de forge sigue ~0.7M. Multiplicador alto para no OOG en broadcast.
 
 deploy-dry: build check-env ## Simula deploy (sin broadcast)
 	@echo ">>> Simulación de deploy en $(RPC_URL)"
@@ -109,7 +112,13 @@ deploy: build check-env ## Deploy + verify en Etherscan; pide la PK de forma int
 		if [ -n "$(COPW_ADDRESS)" ]; then export COPW_ADDRESS="$(COPW_ADDRESS)"; fi; \
 		forge script $(SCRIPT) \
 			--rpc-url "$(RPC_URL)" \
+			--network ethereum \
+			--chain "$(CHAIN_ID)" \
 			--broadcast \
+			--slow \
+			--gas-estimate-multiplier 800 \
+			--priority-gas-price 1gwei \
+			--with-gas-price 2gwei \
 			--verify \
 			--etherscan-api-key "$(ETHERSCAN_KEY)" \
 			--private-key "$$DEPLOYER_PK"; \
