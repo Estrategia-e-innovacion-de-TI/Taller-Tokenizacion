@@ -3,7 +3,8 @@ import { Link, Outlet, Navigate, useLocation } from "react-router-dom";
 const items = [
   { to: "/conceptos/guia-rwa", label: "Guía RWA" },
   { to: "/conceptos/tokenizacion", label: "Tokenización" },
-  { to: "/conceptos/casos-banca", label: "Casos banca" },
+  { to: "/conceptos/casos-banca", label: "Casos de uso" },
+  { to: "/conceptos/siguientes-pasos", label: "Siguientes pasos" },
   { to: "/conceptos/copw", label: "COPW" },
   { to: "/conceptos/account-abstraction", label: "Account abstraction" },
   { to: "/conceptos/contratos", label: "Contratos" },
@@ -17,7 +18,9 @@ export function ConceptosLayout() {
   }
 
   const wide =
-    loc.pathname.includes("guia-rwa") || loc.pathname.includes("enlaces");
+    loc.pathname.includes("guia-rwa") ||
+    loc.pathname.includes("enlaces") ||
+    loc.pathname.includes("casos-banca");
 
   return (
     <div className="container-app py-10">

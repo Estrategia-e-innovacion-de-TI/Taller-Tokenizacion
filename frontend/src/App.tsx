@@ -13,6 +13,7 @@ import {
   ConceptoCasosBanca,
   ConceptoContratos,
   ConceptoCopw,
+  ConceptoSiguientesPasos,
   ConceptoTokenizacion,
 } from "./pages/conceptos/pages";
 
@@ -33,6 +34,10 @@ export default function App() {
                 <Route path="guia-rwa" element={<GuiaRwaPage />} />
                 <Route path="tokenizacion" element={<ConceptoTokenizacion />} />
                 <Route path="casos-banca" element={<ConceptoCasosBanca />} />
+                <Route
+                  path="siguientes-pasos"
+                  element={<ConceptoSiguientesPasos />}
+                />
                 <Route path="copw" element={<ConceptoCopw />} />
                 <Route path="account-abstraction" element={<ConceptoAA />} />
                 <Route path="contratos" element={<ConceptoContratos />} />

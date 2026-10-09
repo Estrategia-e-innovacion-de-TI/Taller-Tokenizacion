@@ -70,6 +70,6 @@ La rama `turnkey-fallback` es el sitio Turnkey que ya funciona. No la mezcles co
 
 1. Contexto RWA (15–20 min) — ver `recursos/Enlaces_de_interes.md`
 2. Demo guiada `/demo` — cuenta → faucet → comprar → depositar → claim
-3. Conceptos `/conceptos` para Q&A (casos banca, AA, contratos)
+3. Conceptos `/conceptos` para Q&A (casos de uso, siguientes pasos, AA, contratos)
 
 Guion: [`docs/01-guion-demo.md`](docs/01-guion-demo.md) · Guía RWA: [`docs/05-guia-rwa.md`](docs/05-guia-rwa.md)

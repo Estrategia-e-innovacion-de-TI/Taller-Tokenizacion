@@ -15,10 +15,10 @@ Prioridad de lectura para la charla marcada con ★.
 - ★ [J.P. Morgan — Kinexys](https://www.jpmorgan.com/kinexys/index) — pagos, repo y tokenización enterprise
 - ★ [Kinexys — Asset Tokenization](https://www.jpmorgan.com/kinexys/asset-tokenization)
 - ★ [Société Générale — SG-FORGE](https://sgforge.com/) — security tokens + EURCV
-- ★ HSBC Orion — bonos digitales / emisión institucional (buscar “HSBC Orion digital bond”)
+- ★ [HSBC — emisión digital / Orion](https://www.hsbc.com/news-and-views/news/media-releases/2023/hsbc-and-ebs-complete-first-digitally-native-note-issuance)
 - ★ UBS — notas y fondos tokenizados (clientes institucionales)
-- ★ Broadridge DLR / HQLAx — repo y colateral en DLT a escala
-- ★ BlackRock BUIDL (treasuries tokenizados) — [RWA.xyz](https://www.rwa.xyz/)
+- ★ [HQLAx — colateral en DLT](https://www.hqlax.com/) · Broadridge DLR
+- ★ [BlackRock — BUIDL](https://www.blackrock.com/corporate/newsroom/press-releases/article/corporate-one/press-releases/blackrock-launches-first-tokenized-fund-buidl) · [RWA.xyz](https://www.rwa.xyz/)
 - ★ [BIS — Project Agorá](https://www.bis.org/about/bisih/topics/fmis/agora.htm) — depósitos y reservas tokenizados
 - [BIS — Project Agorá report (PDF)](https://www.bis.org/publ/othp110.pdf)
 - ★ [MAS — Project Guardian](https://www.mas.gov.sg/schemes-and-initiatives/project-guardian) — sandbox Singapur

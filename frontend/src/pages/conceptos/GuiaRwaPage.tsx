@@ -224,12 +224,19 @@ export function GuiaRwaPage() {
           </div>
         </div>
         <p className="text-sm text-negro/60">
-          Casos bancarios globales (Kinexys, SG-FORGE, Agorá…):{" "}
+          Casos de uso (dato, fecha, resultado + enlaces):{" "}
           <Link
             to="/conceptos/casos-banca"
             className="font-semibold underline decoration-azul"
           >
-            ver Casos banca
+            ver fichas
+          </Link>
+          {" · "}
+          <Link
+            to="/conceptos/siguientes-pasos"
+            className="font-semibold underline decoration-naranja"
+          >
+            siguientes pasos
           </Link>
           .
         </p>

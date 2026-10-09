@@ -22,7 +22,10 @@ Duración sugerida del bloque demo: **15–20 minutos**.
 
 6. **05 Claim:** Participantes hacen claim. “Tu parte = renta × (tu RENT / total).”
 
-7. **Cierre:** En producción: KYC, custodia, posible ERC-3643, rol del banco (rails COP, sandbox SFC, depósitos tokenizados tipo Agorá).
+7. **Cierre (5–10 min):**
+   - En producción: KYC, custodia, posible ERC-3643, rails de dinero.
+   - Abrir **Conceptos → Casos de uso**: elegir *un* problema de la sala (liquidez / emisión / colateral) y leer *una* tarjeta (qué busca, cómo, qué se consiguió).
+   - **Conceptos → Siguientes pasos**: canvas → spike sobre esta demo → sandbox/legal (SFC). Segundo paso concreto para los equipos.
 
 ## Frases útiles
 

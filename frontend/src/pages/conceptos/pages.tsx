@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
+import { CasoFicha } from "../../components/didactic/CasoFicha";
 import { ConceptExpand } from "../../components/didactic/ConceptExpand";
 import { ContractLinks } from "../../components/didactic/ContractLinks";
 import { DeepLinks } from "../../components/didactic/DeepLinks";
+import { CASO_SECCIONES, casosPorProblema } from "../../data/casos-uso";
 import { enlaces } from "../../data/enlaces";
 
 export function ConceptoTokenizacion() {
@@ -92,78 +94,38 @@ export function ConceptoCasosBanca() {
   return (
     <>
       <h2 className="font-display text-xl font-bold">
-        Casos de banca que tokeniza
+        Casos de uso · banca y sectores cercanos
       </h2>
       <p>
-        A escala mundial, los bancos usan tokenización sobre todo para{" "}
-        <strong>liquidación wholesale</strong>,{" "}
-        <strong>colateral intradía</strong> y{" "}
-        <strong>emisión digital de instrumentos</strong> — no necesariamente
-        sobre cadenas públicas abiertas como esta demo.
+        Cada tarjeta responde tres cosas: <strong>qué busca resolver</strong>,{" "}
+        <strong>cómo lo resuelve</strong> y <strong>qué se consiguió</strong>{" "}
+        (si hay dato público). No son oferta ni producto autorizado en Colombia.
       </p>
 
-      <p className="mt-4 text-xs font-semibold tracking-[0.12em] text-negro/45 uppercase">
-        Clic para profundizar
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <ConceptExpand
-          term="J.P. Morgan · Kinexys"
-          accent="amarillo"
-          summary="Plataforma bank-led (antes Onyx): pagos programables, repo intradía y tokenización de activos como money market funds."
-          links={enlaces("kinexys", "kinexys-ats", "coindesk-repo")}
-        />
-        <ConceptExpand
-          term="SG-FORGE"
-          accent="naranja"
-          summary="Filial de Société Générale: security tokens y stablecoin EUR CoinVertible (EURCV) en cadenas públicas, alineada a MiCA."
-          links={enlaces("sgforge")}
-        />
-        <ConceptExpand
-          term="Project Agorá"
-          accent="azul"
-          summary="Iniciativa BIS + bancos centrales y comerciales sobre depósitos y reservas tokenizados para liquidación cross-border."
-          links={enlaces("agora", "agora-pdf")}
-        />
-        <ConceptExpand
-          term="Project Guardian"
-          accent="verde"
-          summary="Sandbox de la MAS (Singapur) con bancos globales: fondos, FX y depósitos tokenizados."
-          links={enlaces("guardian", "rwa-xyz")}
-        />
-      </div>
+      {CASO_SECCIONES.map((sec) => {
+        const casos = casosPorProblema(sec.id);
+        if (casos.length === 0) return null;
+        return (
+          <section key={sec.id} className="mt-8">
+            <h3 className="font-display text-lg font-bold">{sec.title}</h3>
+            <p className="text-sm text-negro/60">{sec.intro}</p>
+            <div className="mt-4 grid gap-4">
+              {casos.map((c) => (
+                <CasoFicha key={c.id} caso={c} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
 
-      <h3 className="mt-6 font-display text-lg font-bold">
-        Emisión y activos digitales
-      </h3>
-      <ul className="list-disc space-y-2 pl-5">
-        <li>
-          <strong>HSBC — Orion</strong>: emisión y ciclo de vida de bonos
-          digitales; emisiones verdes (p. ej. BEI) y distribución cross-border.
-        </li>
-        <li>
-          <strong>UBS</strong>: notas y fondos tokenizados para clientes
-          institucionales.
-        </li>
-      </ul>
-
-      <h3 className="mt-6 font-display text-lg font-bold">
-        Repo, colateral y depósitos
-      </h3>
-      <ul className="list-disc space-y-2 pl-5">
-        <li>
-          <strong>Broadridge DLR / HQLAx</strong>: repo y movilidad de colateral
-          HQLA en DLT a escala institucional.
-        </li>
-        <li>
-          <strong>BlackRock BUIDL</strong>: treasuries tokenizados — referencia
-          en dashboards RWA.
-        </li>
-      </ul>
-
-      <p className="mt-4 border-l-4 border-amarillo pl-3 text-sm text-negro/70">
-        La demo RENT enseña el mecanismo (participación + renta). En banca real
-        el mismo patrón aparece con KYC, permissioned ledgers y liquidación en
-        dinero de banco o de banco central.
+      <p className="mt-6 text-sm">
+        ¿Qué hace el equipo después? →{" "}
+        <Link
+          to="/conceptos/siguientes-pasos"
+          className="font-semibold underline decoration-naranja"
+        >
+          Siguientes pasos
+        </Link>
       </p>
 
       <DeepLinks
@@ -171,12 +133,106 @@ export function ConceptoCasosBanca() {
         items={enlaces(
           "kinexys",
           "kinexys-ats",
+          "buidl",
+          "hsbc-orion",
           "sgforge",
+          "hqla",
           "agora",
           "agora-pdf",
           "guardian",
           "rwa-xyz",
+          "sfc-piloto",
           "coindesk-repo",
+        ).map((e) => ({
+          href: e.href,
+          label: e.label,
+          note: e.note,
+        }))}
+      />
+    </>
+  );
+}
+
+export function ConceptoSiguientesPasos() {
+  return (
+    <>
+      <h2 className="font-display text-xl font-bold">
+        Después del taller · siguientes pasos
+      </h2>
+      <p>
+        Objetivo: pasar de la demo a una idea <strong>materializable</strong> por
+        un equipo de negocio + tecnología + riesgo/legal — sin saltar a mainnet.
+      </p>
+
+      <ol className="mt-4 list-decimal space-y-4 pl-5">
+        <li>
+          <strong>Mapear el caso interno (½ día).</strong> Activo o derecho,
+          quién custodia, quién liquida, quién hace KYC, cashflow esperado.
+          Escribirlo en una página.
+        </li>
+        <li>
+          <strong>Canvas de tokenización (1–2 días).</strong> Qué va on-chain vs
+          off-chain; ledger público vs permissioned; dinero de liquidación
+          (depósito tokenizado, stablecoin regulada, rails actuales).
+        </li>
+        <li>
+          <strong>Spike técnico (1–2 semanas).</strong> Fork de esta demo con{" "}
+          <em>su</em> activo mock: listar gaps (ERC-3643 / identity, roles,
+          oráculos, pausas, reportes). No hace falta producción.
+        </li>
+        <li>
+          <strong>Sandbox y gobierno (paralelo).</strong> En Colombia: interlocución
+          con riesgo/legal y, si aplica, marco tipo laArenera (SFC). Ver{" "}
+          <Link
+            to="/conceptos/casos-banca"
+            className="font-semibold underline decoration-azul"
+          >
+            Casos · Colombia
+          </Link>
+          .
+        </li>
+        <li>
+          <strong>Go / no-go.</strong> ¿Hay sponsor de negocio, rails de pago
+          claros y custodia definida? Si falta uno de los tres, el siguiente
+          paso es cerrar ese hueco — no escribir más contratos.
+        </li>
+      </ol>
+
+      <div className="mt-6 flex flex-wrap gap-2">
+        <ConceptExpand
+          term="Entregable mínimo del spike"
+          accent="amarillo"
+          summary="Diagrama de 1 página + lista de gaps vs la demo + decisión: piloto interno, sandbox, o aparcar."
+          links={enlaces("chainlink-how", "erc3643")}
+        />
+        <ConceptExpand
+          term="Qué no hacer de inmediato"
+          accent="naranja"
+          summary="Subir la demo a mainnet, prometar rentabilidad, o saltarse custodia/KYC. El taller es mecanismo, no producto."
+          links={enlaces("sfc-piloto", "banrep")}
+        />
+        <ConceptExpand
+          term="Inspiración de mercado"
+          accent="verde"
+          summary="Relee 1–2 fichas de Casos de uso del mismo problema que tu mapa interno (liquidez, emisión, colateral…)."
+          links={enlaces("rwa-xyz", "mckinsey-waves")}
+        >
+          <Link
+            to="/conceptos/casos-banca"
+            className="font-semibold underline decoration-verde"
+          >
+            Abrir Casos de uso →
+          </Link>
+        </ConceptExpand>
+      </div>
+
+      <DeepLinks
+        items={enlaces(
+          "chainlink-how",
+          "erc3643",
+          "sfc-piloto",
+          "guardian",
+          "agora",
         ).map((e) => ({
           href: e.href,
           label: e.label,
